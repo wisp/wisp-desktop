@@ -1,0 +1,1 @@
+window.eel.set_host('http://localhost:8888')

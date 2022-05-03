@@ -1,0 +1,90 @@
+@import "../global/Global.scss";
+
+form {
+    & * {
+        box-sizing: border-box;
+    }
+
+    label {
+        display: block;
+
+        & span {
+            display: block;
+            margin-bottom: 0.15em;
+            color: $gray4;
+        }
+    }
+
+    input {
+        border: 2px solid $gray6;
+        color: $gray1;
+        border-radius: 4px;
+        padding: 7px 10px;
+        margin-bottom: 8px;
+        width: 100%;
+        font-family: "IBM Plex Mono";
+        font-size: 14px;
+    }
+
+    .form-group {
+        display: flex;
+        gap: 10px;
+
+        &.right {
+            justify-content: flex-end;
+        }
+
+        &.stretch {
+            flex-grow: 1;
+        }
+
+        &>.bias-80 {
+            width: 150%;
+        }
+
+        &>.bias-50 {
+            width: 50%;
+        }
+
+        & .errors {
+            color: $red1;
+            font-size: 0.8em;
+            margin-top: 0.5em;
+            width: 100%;
+        }
+    }
+}
+
+
+.status-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.status {
+    flex-basis: calc(50% - 10px);
+    .label {
+        color: $gray4;
+        margin-bottom: 0;
+
+        // display: flex;
+        // &::after {
+        //     content: '';
+        //     flex: 1;
+        //     margin-left: .4em;
+        //     // margin-right: 1em;
+        //     margin-top: .74em;
+        //     border-top: .09em $gray6 solid;
+        //     // background-color: $gray4;
+        // }
+    }
+
+    .value {
+        margin-top: 0;
+        color: $gray1;
+        font-family: 'IBM Plex Mono';
+        font-weight: 400;
+        font-size: 18px;
+    }
+}

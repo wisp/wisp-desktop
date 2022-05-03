@@ -1,0 +1,40 @@
+@import '../global/Global.scss';
+
+.icon {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    text-transform: lowercase !important;
+    font-size: 1.5em;
+    vertical-align: -0.25em;
+    
+    line-height: 50%;
+
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    
+    &.small {
+        font-size: 1.3em;
+    }
+}
+
+.icon-empty {
+    width: 1.5em;
+}
+
+.icon-button {
+    margin: 0;
+    padding: 0;
+    // width: 1.3em;
+    border: none;
+    background: none;
+    font-size: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: $smallRadius;
+
+    &:hover,
+    &:focus {
+        background-color: $gray7;
+    }
+}

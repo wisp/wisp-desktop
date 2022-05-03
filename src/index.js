@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import { App } from './App';
 import reportWebVitals from './reportWebVitals';
+import { getQueriesForElement } from '@testing-library/react';
 
 ReactDOM.render(
   <React.StrictMode>
