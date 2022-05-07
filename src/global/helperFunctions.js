@@ -1,4 +1,9 @@
 export function getRelativeTime(time, starting = "", ending = 'ago') {
+
+    if (time == -1) {
+        return "Never";
+    }
+
     time = time * 1000
     var delta = Math.round((+new Date - time) / 1000);
 
@@ -9,7 +14,7 @@ export function getRelativeTime(time, starting = "", ending = 'ago') {
 
     var string;
 
-    if (delta < 30) {
+    if (delta < 5) {
         string = 'just now';
     } else if (delta < minute) {
         string = delta + ' seconds ' + ending;

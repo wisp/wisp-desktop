@@ -66,6 +66,7 @@ class RFIDReader:
 
         self.isConnected = False
 
+        self.count = 0
 
     def tagSeen(self, tagReport):
         try:
@@ -86,8 +87,9 @@ class RFIDReader:
                 newTag['wispId'] = epc[20:24]
                 newTag['rssi'] = tag['PeakRSSI'][0]
                 newTag['seen'] = time.time()
-
-                print(newTag)
+                
+                self.count += 1
+                print(self.count)
                 eel.acceptTag(newTag)
 
         except Exception as e:

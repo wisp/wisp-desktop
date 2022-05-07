@@ -1,0 +1,57 @@
+@import '/src/global/Global.scss';
+
+.recent-tags-table-container {
+    width: 100%;
+    height: 100%;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    
+    table {
+        text-align: left;
+        width: 100%;
+        border-collapse: collapse; 
+
+        thead th {
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 15px;
+            color: $gray3;
+            padding-bottom: 10px;
+            
+
+            .sorted-indicator {
+                float: right;
+                padding-right: 30px;
+                width: 0;
+                color: $primary;
+            }
+
+        }
+
+        tbody {
+            font-family: "IBM Plex Mono";
+            width: 100%;
+            tr {
+                border-top: 2px solid $gray8;
+            }
+
+        }
+
+        td {
+            padding: 12px;
+            padding-left: 0;
+        }
+
+        .actions .icon {
+            text-align: right;
+            color: $gray4;
+            visibility: hidden;
+        }
+
+        tr:hover {
+            .actions .icon {
+                visibility: visible;
+            }
+        }
+    }
+}

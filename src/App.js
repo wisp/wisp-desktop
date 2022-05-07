@@ -1,12 +1,10 @@
 import './App.scss';
 import React, { Component, useEffect } from 'react';
-import ReactDOM from "react-dom";
-import RecentTags from './widgets/RecentTags';
-import ConnectionWindow from './components/connection/connectionWindow/ConnectionWindow';
-import Alerts from './components/Alerts';
-import WindowManager from './components/WindowManager';
-import ImuDemo from './widgets/ImuDemo';
-import { EelListener } from './components/EelListener'
+import ConnectionWindow from 'components/connection/ConnectionWindow/ConnectionWindow';
+import Alerts from 'components/Alerts/Alerts';
+import WindowManager from 'components/window/WindowManager/WindowManager';
+import { EelListener } from 'dataManagement/EelListener';
+import { ConnectionContext } from 'dataManagement/ConnectionContext';
 
 const ConnectionStat = React.createContext({});
 
@@ -39,7 +37,8 @@ class App extends Component {
   render() {
     return (
       <div className="app">
-          <Alerts>
+        <Alerts>
+          <ConnectionContext>
             <EelListener>
               {/* <TagData.Provider value={this.state}> */}
               <ConnectionWindow />
@@ -47,12 +46,12 @@ class App extends Component {
                 {/* <RecentTags /> */}
                 {/* <ImuDemo /> */}
                 <WindowManager>
-                  <RecentTags />
                 </WindowManager>
               </div>
               {/* </TagData.Provider> */}
             </EelListener>
-          </Alerts>
+          </ConnectionContext>
+        </Alerts>
       </div>
     );
   }

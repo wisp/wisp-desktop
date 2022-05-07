@@ -1,0 +1,95 @@
+@import '/src/global/Global.scss';
+
+.button {
+    cursor: pointer;
+    border: none;
+    position: relative;
+    border-radius: $smallRadius;
+    padding: 7px 12px;
+    font-weight: 500;
+    display: inline-block;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    box-shadow: $shadow2;
+    transition: filter $shortDelay, box-shadow $shortDelay;
+    font-family: "IBM Plex Sans";
+
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+
+    background-color: $gray8;
+    color: $gray2;
+
+    &.button-icon {
+        padding: 7px 7px;
+    }
+
+    &.button-level1 {
+        background-color: $primary;
+        color: $gray10;
+    }
+
+    &.button-level2 {
+        $inset-shadow: inset 0px 0px 0px 2px $primary;
+
+        background-color: $gray10;
+        color: $primary;
+        box-shadow: $inset-shadow;
+
+        &:hover {
+            box-shadow: $inset-shadow, $shadow1;
+        }
+
+        &:active {
+            box-shadow: $inset-shadow, $shadow2;
+        }
+
+    }
+
+    &.button-level3 {
+        background-color: $gray4;
+        color: $gray10;
+    }
+
+    &.button-level5 {
+        background-color: transparent;
+        box-shadow: none;
+        text-transform: none;
+        text-decoration: underline;
+
+        &:hover {
+            box-shadow: none;
+            text-decoration: none;
+        }
+    }
+
+    &.button-size2 {
+        font-size: 1.5em;
+    }
+
+    &:hover {
+        filter: brightness(88%);
+        box-shadow: $shadow1;
+    }
+
+    &:active {
+        filter: brightness(81%);
+        box-shadow: $shadow2;
+    }
+}
+
+.dropdown {
+    position: absolute;
+    right: 0;
+    width: 170px;
+    top: -7px;
+    transform: translate(0,-100%);
+    overflow: hidden;
+    border-radius: $smallRadius;
+    box-shadow: $shadow2;
+
+    .button {
+        width: 100% !important;
+        border-radius: 0;
+    }
+}

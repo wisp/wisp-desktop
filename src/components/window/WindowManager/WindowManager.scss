@@ -1,0 +1,23 @@
+@import '/src/global/Global.scss';
+
+.react-grid-item.react-grid-placeholder {
+    background: $gray1 !important;
+}
+
+.react-resizable-handle {
+    transform: none !important;
+    -webkit-transform: none !important;
+    width: 12px !important;
+    height: 12px !important;
+    padding: 0 !important;
+    opacity: 0;
+}
+
+.react-grid-layout.layout:empty::after {
+    content: 'Add a widget to get started';
+    display: block;
+    line-height: 100vh;
+    text-align: center;
+    font-size: 18px;
+    color: $gray6;
+}
