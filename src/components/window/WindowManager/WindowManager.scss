@@ -1,4 +1,11 @@
-@import '/src/global/Global.scss';
+@import "/src/global/Global.scss";
+
+.window-manager-container {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+}
 
 .react-grid-item.react-grid-placeholder {
     background: $gray1 !important;
@@ -14,7 +21,7 @@
 }
 
 .react-grid-layout.layout:empty::after {
-    content: 'Add a widget to get started';
+    content: "Add a widget to get started";
     display: block;
     line-height: 100vh;
     text-align: center;

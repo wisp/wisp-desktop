@@ -5,12 +5,14 @@ import { useTable, useSortBy } from 'react-table';
 import { TagDataRecent } from 'dataManagement/EelListener';
 import Icon from 'components/Icon/Icon';
 import { getRelativeTime, getFormattedData, getWispType } from 'global/helperFunctions';
+import { IconButton, Tooltip } from '@mui/material';
+import { Connection } from 'dataManagement/ConnectionContext';
 
 // TODO: Refresh the table body such that table sorting remains when a new tag is added.
 //       Add buttons for filtering each tag (add, remove from whitelist, blacklist).
-//       Format data based on the wisp type.
 
 const RecentTags = (props) => {
+    const [connection, setConnection] = useContext(Connection)
     const context = useContext(TagDataRecent);
     const [, updateState] = useState();
     const forceUpdate = useCallback(() => updateState({}), []);
@@ -22,50 +24,138 @@ const RecentTags = (props) => {
         return () => clearInterval(interval);
     }, [])
 
-
     const columns = React.useMemo(
         () => [
             {
                 Header: 'Last Seen',
                 accessor: 'seen',
                 Cell: ({ cell: { value } }) => getRelativeTime(value),
+                width: 150,
             },
             {
                 Header: 'Count',
                 accessor: 'count',
+                width: 65,
             },
             {
                 Header: 'EPC',
                 accessor: 'epc',
+                width: 250,
             },
             {
                 Header: 'Tag Type',
                 accessor: 'wispType',
                 Cell: ({ cell: { value } }) => getWispType(value),
+                width: 150,
             },
             {
                 Header: 'Data',
-                accessor: 'wispData',
-                // TODO: Format the data depending on the value of the whole row
-
+                accessor: 'formattedString',
+                width: 240,
             },
             {
                 Header: 'RSSI',
                 accessor: 'rssi',
+                width: 30,
             },
-            // {
-            //     // Header: 'Actions',
-            //     accessor: 'actions',
-            //     className: 'actions',
-            // },
+            {
+                Header: 'Filters',
+                accessor: 'actions',
+                className: 'actions',
+                width: 75,
+                minWidth: 50,
+                textAlign: 'right',
+                disableSortBy: true,
+                Cell: ({ cell }) => {
+                    const wispId = cell.row.values.epc.slice(cell.row.values.epc.length - 4);
+                    return (
+                        // <button value={cell.row.values.name} onClick={props.handleClickGroup}>
+
+                        //     {cell.row.values.epc}
+                        // </button>
+                        <div>
+                            {connection.filters.whitelist.includes(wispId) || connection.filters.blacklist.includes(wispId) ?
+                                <span>
+                                    <Tooltip title="Remove filter">
+                                        <IconButton
+                                            size="small"
+                                            sx={{ m: -0.5 }}
+                                            onClick={() => {
+                                                setConnection({
+                                                    ...connection,
+                                                    filters: {
+                                                        blacklist: connection.filters.blacklist.filter(e => e !== wispId),
+                                                        whitelist: connection.filters.whitelist.filter(e => e !== wispId)
+                                                    }
+                                                })
+                                            }}>
+                                            <Icon name="filter_alt_off" small />
+                                        </IconButton>
+                                    </Tooltip>
+                                </span>
+
+                                :
+
+                                <span className='action-icons'>
+                                    <Tooltip title="Add to whitelist">
+                                        <IconButton
+                                            size="small"
+                                            sx={{ m: -0.5, mr: 0.1 }}
+                                            onClick={() => {
+                                                setConnection({
+                                                    ...connection,
+                                                    filters: {
+                                                        ...connection.filters,
+                                                        whitelist: [...connection.filters.whitelist, wispId]
+                                                    }
+                                                })
+                                            }}>
+                                            <Icon name="check_circle" small />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Add to blacklist">
+                                        <IconButton
+                                            size="small"
+                                            sx={{ m: -0.5 }}
+                                            onClick={() => {
+                                                setConnection({
+                                                    ...connection,
+                                                    filters: {
+                                                        ...connection.filters,
+                                                        blacklist: [...connection.filters.blacklist, wispId]
+                                                    }
+                                                })
+                                            }}>
+                                            <Icon name="block" small />
+                                        </IconButton>
+                                    </Tooltip>
+
+                                </span>
+
+                            }
+                        </div>
+                    )
+                }
+            },
         ],
-        []
+        [connection]
     )
 
     let data = [];
     data = context.data;
 
-    const tableInstance = useTable({ columns, data }, useSortBy);
+    const tableInstance = useTable({
+        columns,
+        data,
+
+        autoResetPage: false,
+        autoResetExpanded: false,
+        autoResetGroupBy: false,
+        autoResetSelectedRows: false,
+        autoResetSortBy: false,
+        autoResetFilters: false,
+        autoResetRowState: false,
+    }, useSortBy);
 
     const {
         getTableProps,
@@ -76,9 +166,7 @@ const RecentTags = (props) => {
     } = tableInstance
 
     return (
-        <Window key={1} title="Recent Tags" right={<Icon small name="close" click={props.onClose} />}>
-            {value => <h1>{value.toString()}</h1>}
-
+        <Window title="Recent Tags" right={<Icon small name="close" click={props.onClose} />}>
             <div className='recent-tags-table-container'>
                 <table {...getTableProps()}>
                     <thead>
@@ -89,15 +177,27 @@ const RecentTags = (props) => {
                                     {// Loop over the headers in each row
                                         headerGroup.headers.map(column => (
                                             // Apply the header cell props
-                                            <th {...column.getHeaderProps((column.getSortByToggleProps()))}>
+                                            <th {...column.getHeaderProps([
+                                                {
+                                                    style: { textAlign: column.textAlign }
+                                                },
+                                                column.getSortByToggleProps()
+                                            ])}>
                                                 {// Render the header
                                                     column.render('Header')}
                                                 <span className="sorted-indicator">
+
                                                     {column.isSorted
                                                         ? column.isSortedDesc
                                                             ? <Icon name="expand_less" />
                                                             : <Icon name="expand_more" />
-                                                        : <Icon name=""/>}
+                                                        : !column.disableSortBy ?
+                                                            <span className='hover-sort-indicator'>
+                                                                <Icon name="expand_more" />
+                                                            </span>
+                                                            :
+                                                            null
+                                                    }
                                                 </span>
                                             </th>
                                         ))}
@@ -120,6 +220,9 @@ const RecentTags = (props) => {
                                                         {...cell.getCellProps([
                                                             {
                                                                 className: cell.column.className, // pay attention to this
+                                                                width: cell.column.width,
+                                                                // minWidth: cell.column.minWidth,
+                                                                style: { textAlign: cell.column.textAlign, minWidth: cell.column.minWidth }
                                                                 // set here your other custom props
                                                             },
                                                         ])}
@@ -138,4 +241,4 @@ const RecentTags = (props) => {
     );
 }
 
-export default RecentTags;
+export default React.memo(RecentTags);

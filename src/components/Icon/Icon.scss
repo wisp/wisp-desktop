@@ -5,7 +5,10 @@
     font-weight: normal;
     font-style: normal;
     text-transform: lowercase !important;
+
     font-size: 1.5em;
+    margin: 0;
+
     vertical-align: -0.25em;
     
     line-height: 50%;
@@ -14,12 +17,8 @@
     -webkit-user-select: none; /* Safari */
     
     &.small {
-        font-size: 1.3em;
+        font-size: 1.2em;
     }
-}
-
-.icon-empty {
-    width: 1.5em;
 }
 
 .icon-button {

@@ -27,7 +27,7 @@ export function getRelativeTime(time, starting = "", ending = 'ago') {
     } else if (delta < day) {
         string = Math.floor(delta / hour) + ' hours ' + ending;
     } else {
-        string = new Date(time).toLocaleString();
+        string = new Date(time).toLocaleTimeString([], {month: 'numeric', day: 'numeric', year: '2-digit', hour: 'numeric', minute: '2-digit'})
     }
 
     if (starting == "") {
@@ -61,4 +61,20 @@ export function getFormattedData(type, data) {
     // }
     console.log(data)
     return "HERE";
+}
+
+export function getRecentDataFromArray(array) {
+    // Remove duplicate entries based on wispId and add count for each duplicate
+    const recentData = [];
+    const recentDataMap = {};
+    for (let i = 0; i < array.length; i++) {
+        const tag = array[i];
+        if (tag['wispId'] in recentDataMap) {
+            recentDataMap[tag['wispId']].count++;
+        } else {
+            recentDataMap[tag['wispId']] = { ...tag, count: 1 };
+            recentData.push(recentDataMap[tag['wispId']]);
+        }
+    }
+    return recentData;
 }

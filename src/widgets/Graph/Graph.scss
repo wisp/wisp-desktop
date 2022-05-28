@@ -1,1 +1,19 @@
 @import '/src/global/Form.scss';
+
+.graph-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    
+    
+
+    .graph-options {
+        // flex-grow: 1;
+    }
+
+    .graph-contain {
+        overflow: hidden;
+        position: relative;
+        flex-grow: 1;
+    }
+}

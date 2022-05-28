@@ -15,13 +15,20 @@
             font-weight: 500;
             text-transform: uppercase;
             font-size: 15px;
-            color: $gray3;
+            color: $gray4;
             padding-bottom: 10px;
-            
 
+            .hover-sort-indicator {
+                color: $gray6;
+                display: none;
+            }
+
+            &:hover .sorted-indicator .hover-sort-indicator {
+                display: inline;
+            }
+        
             .sorted-indicator {
-                float: right;
-                padding-right: 30px;
+                display: inline-block;
                 width: 0;
                 color: $primary;
             }
@@ -40,16 +47,26 @@
         td {
             padding: 12px;
             padding-left: 0;
+
+            &:last-child {
+                padding-right: 6px;
+            }
         }
 
-        .actions .icon {
+        .action-icons {
             text-align: right;
             color: $gray4;
             visibility: hidden;
         }
 
+        // .remove-filter {
+        //     text-align: right;
+        //     color: $gray4;
+        //     visibility: visible;
+        // }
+
         tr:hover {
-            .actions .icon {
+            .action-icons {
                 visibility: visible;
             }
         }

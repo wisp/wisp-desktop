@@ -1,0 +1,57 @@
+@import "/src/global/Form.scss";
+
+.file-drop-area {
+    width: 100%;
+    height: 200px;
+    background-color: $gray8;
+    border-radius: $smallRadius;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease;
+    cursor: pointer;
+
+    .file-area {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        box-sizing: border-box;
+
+        .file-icon {
+            box-sizing: border-box;
+            flex-basis:40%;
+            border-right: 2px solid $gray7;
+            padding-right: 10px;
+            padding-top: 54px;
+
+            &>p {
+                margin-top: 13px;
+                word-break: break-all;
+            }
+
+            &>span.icon {
+                font-size: 2.5em;
+                color: $gray5;
+            }
+        }
+
+        .file-details {
+            color: $gray2;
+            box-sizing: border-box;
+            flex-basis: 65%;
+            text-align: left;
+            padding: 26px 18px;
+            padding-right: 0;
+
+            p {
+                margin-bottom: 10px;
+            }
+        }
+    }
+
+    &>span {
+        line-height: 200px - 30px;
+        color: $gray2;
+        user-select: none;
+    }
+}

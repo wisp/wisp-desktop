@@ -1,1 +1,34 @@
 @import '/src/global/Form.scss';
+
+.debug-console {
+    width: 100%;
+    height: 200px;
+    margin-top: 1.5em;
+    padding: 10px;
+    padding-bottom: 0;
+    box-sizing: border-box;
+    background-color: $gray2;
+    border-radius: $smallRadius;
+    overflow-y: scroll;
+    font-family: "IBM Plex Mono";
+    overflow-wrap: break-word;
+
+    p {
+        margin: 0 0 .5em 1.5em;
+        position: relative;
+        color: $gray9;
+        font-size: 12px;
+        line-height: 1.1;
+
+        &::before {
+            content: '> ';
+            position: absolute;
+            left: -1.5em;
+        }
+    }
+
+    .bottom-element {
+        height: 7px;
+    }
+
+}

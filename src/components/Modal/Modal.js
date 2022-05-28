@@ -5,7 +5,6 @@ import Icon from 'components/Icon/Icon';
 const Modal = (props) => {
 
     function stopPropagation(e) {
-        e.preventDefault();
         e.stopPropagation();
     }
 

@@ -7,11 +7,10 @@ import '/node_modules/react-resizable/css/styles.css';
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { useEffect, useRef, useState, cloneElement } from 'react';
 import Icon from 'components/Icon/Icon';
-import { Button, ButtonDropdown } from 'components/Button/Button';
+import ButtonMenu from 'components/ButtonMenu/ButtonMenu'
 
-import ImuDemo from 'widgets/ImuDemo/ImuDemo';
-import Graph from 'widgets/Graph/Graph';
-import RecentTags from 'widgets/RecentTags/RecentTags';
+import widgets from 'widgets/widgets.js';
+import { MenuItem, ListItemIcon } from '@mui/material';
 
 const GridLayout = WidthProvider(Responsive);
 
@@ -43,17 +42,17 @@ const WindowManager = (props) => {
     }, []);
 
     return (
-        <div ref={element} style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div ref={element} className="window-manager-container">
             <GridLayout
                 breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-                cols={{ lg: 12, md: 9, sm: 7, xs: 4, xxs: 2 }}
+                cols={{ lg: 18, md: 12, sm: 9, xs: 6, xxs: 3 }}
                 className="layout"
-                rowHeight={30}
+                rowHeight={50}
                 autoSize={false}
                 draggableCancel=".window-content"
                 margin={[15, 15]}
             >
-                
+
                 {windows.map(window => {
                     const cloned = cloneElement(
                         window.element,
@@ -66,12 +65,10 @@ const WindowManager = (props) => {
                         </div>
                     );
                 })}
-
-
-
             </GridLayout>
+            
             <div style={{ position: 'fixed', bottom: '15px', right: '15px' }}>
-                <ButtonDropdown
+                {/* <ButtonDropdown
                     size="2"
                     level="1"
                     mouseEnter={() => addWindow({ x: 0, y: 0, w: 3, h: 8, element: <ImuDemo /> })}
@@ -84,22 +81,42 @@ const WindowManager = (props) => {
                     }
                 >
                     <Icon name="add" />
-                </ButtonDropdown>
+                </ButtonDropdown> */}
 
                 {/* <Button size="2" level="1" click={() => addWindow({ x: 0, y: 0, w: 3, h: 8, element: <RecentTags /> })}>
                     <Icon name="add" />
                 </Button> */}
+                <ButtonMenu
+                    buttonLabel={(<span><Icon name="add" />&nbsp;&nbsp;Add Widget</span>)}
+                >
+                    {
+                        Object.keys(widgets).map(key => {
+                            const widget = widgets[key];
+                            return (
+                                <MenuItem onClick={() => addWindow({
+                                    x: 0, y: -1,
+                                    w: widget.defaultSize[0],
+                                    h: widget.defaultSize[1],
+                                    element: widget.component,
+                                    minW: widget.minSize[0] || 1,
+                                    minH: widget.minSize[1] || 1,
+                                    maxW: widget.maxSize[0] || Infinity,
+                                    maxH: widget.maxSize[1] || Infinity,
+                                    title: widget.title,
+                                })}>
+                                    <ListItemIcon>
+                                        <Icon name={widget.icon} />
+                                    </ListItemIcon>
+                                    {widget.title}
+                                </MenuItem>
+                            )
+                        })
+                    }
+                </ButtonMenu>
+
             </div>
         </div>
     );
-}
-
-const GridWindow = (props) => {
-    return (
-        <div key='a'>
-            <RecentTags />
-        </div>
-    )
 }
 
 export default WindowManager;

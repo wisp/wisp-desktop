@@ -1,25 +1,25 @@
 @import '/src/global/Global.scss';
 
-.connection-window {
+.connection-window.window {
     width: 350px;
     border-radius: 0;
     height: 100vh;
+    box-shadow: none;
     transition: width 0.2s ease-in-out;
 
-    border-right: 8px solid $green2;
+    border-right: 3px solid $green2;
 
     &.red {
-        border-right: 8px solid $red2;
+        border-right: 3px solid $red2;
     }
 
-    & .window-content {
+    &>.window-content {
         box-sizing: border-box;
-        width: 342px;
-        overflow: hidden;
+        width: 347px;
     }
 
     &.collapsed {
-        width: 37px;
+        width: 32px;
 
         & .window-content {
             display: flex;

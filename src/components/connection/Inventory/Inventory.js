@@ -1,15 +1,25 @@
 import './Inventory.scss';
 
 // import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
+
 import React, { useState, useContext, useRef } from 'react';
 import Modal from 'components/Modal/Modal';
-import { Button } from 'components/Button/Button';
+// import { Button } from 'components/Button/Button';
 import Icon from 'components/Icon/Icon';
 import { Connection } from 'dataManagement/ConnectionContext';
+import { TextField, FormGroup, Button, IconButton, Tooltip, Checkbox, FormControlLabel } from '@mui/material';
+import ChipList from 'components/ChipList/ChipList';
+import ReaderConsole from 'components/connection/ReaderConsole/ReaderConsole';
 
 // TODO: Switch to Formik so we can use validation.
 //       Make the modal save values before it's modified so that if closed, we can restore the old values.
-//       Disable the form when the inventory is running.
+
+const validation = yup.object({
+    host: yup.string('Enter the reader hostname').required(),
+    port: yup.number('Must be a number').min(1, 'Must be between 1-65535').max(65535, 'Must be between 1-65535')
+})
 
 const Inventory = (props) => {
 
@@ -18,6 +28,17 @@ const Inventory = (props) => {
 
     const connectionRef = useRef();
     connectionRef.current = connection;
+
+    const formik = useFormik({
+        initialValues: {
+            host: connection.settings.host,
+            port: connection.settings.port,
+        },
+        validationSchema: validation,
+        onSubmit: (values) => {
+            alert(JSON.stringify(values, null, 2));
+        },
+    })
 
     function toggleConnection() {
 
@@ -33,8 +54,10 @@ const Inventory = (props) => {
         }
         else {
             const params = connection.settings;
+            const filters = connection.filters;
             console.log("sending to reader:", connection.settings);
-            window.eel.GUIStartInventory(params.host, parseInt(params.port), params.antennas, params.tari, params.power, params.mode)
+            window.eel.GUIStartInventory(params.host, parseInt(params.port), params.antennas, params.tari, params.power, params.mode);
+            window.eel.changeFilters(filters.whitelist, filters.blacklist)
             setConnection({
                 ...connection,
                 status: {
@@ -54,202 +77,151 @@ const Inventory = (props) => {
     }
 
     return (
-        <div>
-            {/* <Formik
-                initialValues={connection.settings}
-                validate={values => {
-                    const errors = {};
-                    if (!values.host) {
-                        errors.host = 'Required';
-                    } else if (
-                        !/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(values.host)
-                    ) {
-                        errors.host = 'Invalid hostname';
-                    }
-
-                    if (!values.port) {
-                        errors.port = 'Required';
-                    } else if (!/^[0-9]+$/.test(values.port)) {
-                        errors.port = 'Must be a number';
-                    } else if (values.port < 1 || values.port > 65535) {
-                        errors.port = 'Port must be between 1 and 65535';
-                    }
-
-                    if (!values.tari) {
-                        errors.tari = 'Required';
-                    } else if (!/^[0-9]+$/.test(values.tari)) {
-                        errors.tari = 'Must be a number';
-                    } else if (values.tari < 0 || values.tari > 99999) {
-                        errors.tari = 'Tari must be between 0 and 99999';
-                    }
-
-                    // if (!values.antennas) {
-                    //     errors.antennas = 'Required';
-                    // } else if (!/^[1-9](,[1-9])*$/.test(values.antennas)) {
-                    //     errors.antennas = 'Must be comma separated list';
-                    // }
-
-                    // if (!values.power) {
-                    //     errors.power = 'Required';
-                    // } else if (!/^[0-9]+$/.test(values.power)) {
-                    //     errors.power = 'Must be a number';
-                    // }
-
-                    // if (!values.mode) {
-                    //     errors.mode = 'Required';
-                    // } else if (!/^[0-9]+$/.test(values.mode)) {
-                    //     errors.mode = 'Must be a number';
-                    // }
-                    
-                    return errors;
-                }}
-                onSubmit={async (values) => {
-                    await saveAndToggle(values, connection);
-                }}
-            >
-                {({ isSubmitting }) => (
-                    <Form>
-                        <div className='form-group stretch'>
-                            <label className="bias-80">
-                                <span>Host</span>
-                                <Field type="text" name="host" />
-                            </label>
-                            <label className="bias-20">
-                                <span>Port</span>
-                                <Field type="text" name="port" />
-                            </label>
-                        </div>
-                        <div className='errors'>
-                            <ErrorMessage name="host" component="div" />
-                            <ErrorMessage name="port" component="div" />
-                        </div>
-
-                        <div className='form-group right top-space'>
-                            <Button level="3" click={() => setShowModal(true)}>
-                                <Icon name="settings" />
-                            </Button>
-                            <Button
-                                type="submit"
-                                style={{ width: '143px' }}
-                                level={connection.status.connected ? "2" : "1"}
-                            >
-                                {connection.status.connected ? "Stop" : "Start"} Inventory
-                            </Button>
-                        </div>
-
-                        {/* <Modal show={showModal} title="Additional Reader Settings" close={() => setShowModal(false)}>
-                            <div className='form-group stretch'>
-                                <label className='bias-50'>
-                                    <span>Tari</span>
-                                    <Field type="text" name="tari" />
-                                </label>
-                                <label className='bias-50'>
-                                    <span>Antennas</span>
-                                    <Field type="text" name="antennas" />
-                                </label>
-                            </div>
-                            <div className='form-group stretch'>
-                                <label className='bias-50'>
-                                    <span>Power</span>
-                                    <Field type="text" name="power" />
-                                </label>
-                                <label className='bias-50'>
-                                    <span>Mode</span>
-                                    <Field type="text" name="mode" />
-                                </label>
-                            </div>
-                            <div className='form-group right top-space'>
-                                <Button level="5" click={() => {
-                                    setSettings(
-                                        {
-                                            tari: 7140,
-                                            antennas: [1],
-                                            power: 0,
-                                            mode: 0,
-                                        }
-                                    );
-                                }
-                                }>
-                                    Reset
-                                </Button>
-                                <Button level="1" click={() => setShowModal(false)}>
-                                    Save
-                                </Button>
-                            </div>
-
-                        </Modal>
-                    </Form>
-                )}
-            </Formik> */}
-
-            <form>
-                <div className='form-group stretch'>
-                    <label className='bias-80'>
-                        <span>Host</span>
-                        <input type="text" name="host" value={connection.settings.host} onInput={(e) => setSettings({ host: e.target.value })} />
-                    </label>
-                    <label className='bias-20'>
-                        <span>Port</span>
-                        <input type="text" name="host" value={connection.settings.port} onInput={(e) => setSettings({ port: e.target.value })} />
-                    </label>
+        <form>
+            <h2>Reader Settings</h2>
+            <FormGroup sx={{ mt: 0.5 }} >
+                <div>
+                    <TextField
+                        disabled={connection.status.connected}
+                        id="filled-basic"
+                        label="Hostname"
+                        variant="filled"
+                        sx={{ mr: 1, width: '73%' }}
+                        value={connection.settings.host}
+                        onChange={(e) => setSettings({ host: e.target.value })}
+                    />
+                    <TextField
+                        disabled={connection.status.connected}
+                        id="filled-basic"
+                        label="Port"
+                        variant="filled"
+                        sx={{ width: '24%' }}
+                        value={connection.settings.port}
+                        onChange={(e) => setSettings({ port: e.target.value })}
+                    />
                 </div>
+            </FormGroup>
+
+            {/* <form onSubmit={formik.handleSubmit}>
+                <FormGroup sx={{ mt: 0.5 }} >
+                    <div>
+                        <TextField
+                            disabled={connection.status.connected}
+                            label="Hostname"
+                            variant="filled"
+                            sx={{ mr: 1, width: '73%' }}
+                            value={formik.values.host}
+                            onChange={formik.handleChange}
+                            error={formik.touched.host && Boolean(formik.errors.host)}
+                            helperText={formik.touched.host && formik.errors.host}
+                        />
+                        <TextField
+                            disabled={connection.status.connected}
+                            label="Port"
+                            variant="filled"
+                            sx={{ width: '24%' }}
+                            value={formik.values.port}
+                            onChange={formik.handleChange}
+                            error={formik.touched.port && Boolean(formik.errors.port)}
+                            helperText={formik.touched.port && formik.errors.port}
+                        />
+                    </div>
+                </FormGroup>
+            </form> */}
+
+            {
+                connection.settings.debugLogs &&
+                <ReaderConsole />
+            }
+            <FormGroup sx={{ mt: 1 }}>
                 <div className='form-group right top-space'>
-                    <Button level="3" click={() => setShowModal(true)}>
-                        <Icon name="settings" />
-                    </Button>
+                    <Tooltip title="Additional settings">
+                        <IconButton variant='contained' size="small" disabled={connection.status.connected} onClick={() => setShowModal(true)}>
+                            <Icon name="settings" />
+                        </IconButton>
+                    </Tooltip>
                     <Button
-                        click={(e) => toggleConnection()}
-                        style={{ width: '143px' }}
+                        variant={connection.status.connected ? 'outlined' : 'contained'}
+                        onClick={(e) => toggleConnection()}
+                        color={connection.status.connected ? 'error' : 'primary'}
+                        sx={{ width: '160px' }}
                         level={connection.status.connected ? "2" : "1"}
                     >
                         {connection.status.connected ? "Stop" : "Start"} Inventory
                     </Button>
                 </div>
-                <Modal show={showModal} title="Additional Reader Settings" close={() => setShowModal(false)}>
-                    <div className='form-group stretch'>
-                        <label className='bias-50'>
-                            <span>Tari</span>
-                            <input type="text" name="tari" value={connection.settings.tari} onInput={(e) => setSettings({ tari: e.target.value })} />
-                        </label>
-                        <label className='bias-50'>
-                            <span>Antennas</span>
-                            <input type="text" name="antennas" value={connection.settings.antennas} onInput={(e) => setSettings({ antennas: e.target.value })} />
-                        </label>
-                    </div>
-                    <div className='form-group stretch'>
-                        <label className='bias-50'>
-                            <span>Power</span>
+            </FormGroup>
+            <Modal show={showModal} title="Additional Reader Settings" close={() => setShowModal(false)}>
+                <div className='spacer-1'></div>
+                <div>
+                    <TextField
+                        label="Tari"
+                        variant="filled"
+                        sx={{ mr: 1, width: '49%' }}
+                        value={connection.settings.tari}
+                        onChange={(e) => setSettings({ tari: e.target.value })}
+                    />
+                    <ChipList
+                        color="primary"
+                        label="Antennas"
+                        sx={{ width: '49%', display: 'inline-block' }}
+                        variant="filled"
+                        value={connection.settings.antennas}
+                        onChange={(value) => setSettings({
+                            antennas: value.map(str => {
+                                return Number(str);
+                            })
+                        })}
+                    />
+                </div>
+                <div className='spacer-2'></div>
+                <div>
+                    <TextField
+                        label="Power"
+                        variant="filled"
+                        sx={{ mr: 1, width: '49%' }}
+                        value={connection.settings.power}
+                        onChange={(e) => setSettings({ power: e.target.value })}
+                    />
+                    <TextField
+                        label="Mode"
+                        variant="filled"
+                        sx={{ width: '49%' }}
+                        value={connection.settings.mode}
+                        onChange={(e) => setSettings({ mode: e.target.value })}
+                    />
+                </div>
+                <div className='spacer-2'></div>
+                <FormControlLabel
 
-                            <input type="text" name="power" value={connection.settings.power} onInput={(e) => setSettings({ power: e.target.value })} />
-                        </label>
-                        <label className='bias-50'>
-                            <span>Mode</span>
-                            <input type="text" name="mode" value={connection.settings.mode} onInput={(e) => setSettings({ mode: e.target.value })} />
-                        </label>
-                    </div>
-                    <div className='form-group right top-space'>
-                        <Button level="5" click={() => {
-                            setSettings(
-                                {
-                                    tari: 7140,
-                                    antennas: [1],
-                                    power: 0,
-                                    mode: 0,
-                                }
-                            );
-                        }
-                        }>
-                            Reset
-                        </Button>
-                        <Button level="1" click={() => setShowModal(false)}>
-                            Save
-                        </Button>
-                    </div>
-                </Modal>
-            </form>
-
-
-        </div>
+                    control={
+                        <Checkbox
+                            onClick={(e) => setSettings({ debugLogs: !connection.settings.debugLogs })}
+                            checked={connection.settings.debugLogs}
+                        />
+                    }
+                    label="Display all reader debugging logs"
+                />
+                <div className='form-group right top-space'>
+                    <Button level="5" onClick={() => {
+                        setSettings(
+                            {
+                                tari: 7140,
+                                antennas: [1],
+                                power: 0,
+                                mode: 0,
+                            }
+                        );
+                    }
+                    }>
+                        Reset
+                    </Button>
+                    <Button variant='contained' onClick={() => setShowModal(false)}>
+                        Save
+                    </Button>
+                </div>
+            </Modal>
+        </form >
 
     )
 }

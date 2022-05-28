@@ -16,7 +16,6 @@ const ConnectionStatus = (props) => {
         if (connection.status.connected) {
             // get the time from 15 seconds ago
             const time = new Date().getTime() / 1000 - interval;
-            console.log(time);
             // get the tags that were added in the last 15 seconds
             const tags = tagData.filter(tag => tag.seen > time);
             // get the number of tags that were added in the last 15 seconds
@@ -35,7 +34,7 @@ const ConnectionStatus = (props) => {
             } else {
                 clearInterval(updater);
             }
-        }, 200);
+        }, 250);
         return () => {
             clearInterval(updater);
         }
@@ -44,10 +43,11 @@ const ConnectionStatus = (props) => {
 
     return (
         <div className="connection-status">
+            <h2>Current Status</h2>
             <div className="status-group">
                 <div className="status">
-                    <div className="label">Status</div>
-                    <div className="value">{connection.status.connected ? "Connected" : "Disconnected"}</div>
+                    <div className="label">Inventory</div>
+                    <div className="value">{connection.status.connected ? "Started" : "Stopped"}</div>
                 </div>
                 <div className="status">
                     <div className="label">Last started</div>
@@ -64,7 +64,7 @@ const ConnectionStatus = (props) => {
                 </div>
                 <div className="status">
                     <div className="label">Inventory rate</div>
-                    <div className="value">{tagRate} tag{tagRate === 1 ? "" : "s"}/sec</div>
+                    <div className="value">{tagRate} /sec</div>
                 </div>
                 
             </div>

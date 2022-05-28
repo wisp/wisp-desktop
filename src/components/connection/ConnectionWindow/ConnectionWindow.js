@@ -5,7 +5,9 @@ import Icon from 'components/Icon/Icon';
 import React, { useState, useContext } from 'react';
 import Inventory from 'components/connection/Inventory/Inventory';
 import ConnectionStatus from 'components/connection/ConnectionStatus/ConnectionStatus';
+import Filter from 'components/connection/Filter/Filter';
 import { Connection } from 'dataManagement/ConnectionContext';
+import DataButtons from 'components/connection/DataButtons/DataButtons';
 
 
 
@@ -24,10 +26,10 @@ const ConnectionWindow = (props) => {
                     {/* <div className="spacer-1"></div> */}
                     <div className='small-connection-details'>
                         <div className='title'>
-                            Connection Details
+                            Connection
                         </div>
                         <div className='bottom'>
-                            
+                            {connection.status.connected ? "Connected" : "Disconnected"}
                         </div>
                     </div>
                 </div>
@@ -38,7 +40,7 @@ const ConnectionWindow = (props) => {
     return (
         <div className={`window connection-window ${barColor}`}>
             <WindowBar
-                title="Connection Details"
+                title="Connection"
                 right={<Icon
                     name="chevron_left"
                     click={(e) => setCollapsed(true)}
@@ -46,8 +48,12 @@ const ConnectionWindow = (props) => {
             />
             <div className="window-content">
                 <Inventory />
-                <div className='spacer-3'></div>
+                <div className='spacer-4'></div>
+                <Filter />
+                <div className='spacer-4'></div>
                 <ConnectionStatus />
+                <div className='spacer-4'></div>
+                <DataButtons />
             </div>
         </div>
     );
