@@ -96,6 +96,10 @@
         color: inherit;
     }
 
+    h3:empty {
+        margin-top: -5px;
+    }
+
     p {
         margin: 0;
         margin-top: 5px;

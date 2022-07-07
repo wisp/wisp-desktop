@@ -34,7 +34,7 @@ class SllurpHandler(logging.StreamHandler):
             print(sev, title, msg)
         elif (sev == "info"):
             if (title == "connection failed" ):
-                eel.createAlert("error", "Connection failed", "DNS lookup failed. Check the hostname.", "cable")
+                eel.createAlert("error", "Connection failed", "Check the hostname and port.", "cable")
             if ("connected to" in msg):
                 eel.createAlert("success", "Inventory started", "Accepting tags from the reader.", "cable")
         
@@ -110,7 +110,7 @@ class RFIDReader:
             eel.createAlert("error", "Inventory already started", "Stop the inventory before starting a new one")
         else:
             self.isConnected = True
-            self.fac = LLRPClientFactory(report_every_n_tags=10,
+            self.fac = LLRPClientFactory(report_every_n_tags=1,
                                         antennas=antennas,
                                         tx_power=tx_power,
                                         start_inventory=True,
@@ -192,4 +192,4 @@ def test():
 
 
 eel.init('public')
-eel.start({"port": 3000}, host="localhost", port=8888)
+eel.start({"port": 3000}, host="localhost", port=8888, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])

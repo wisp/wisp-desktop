@@ -38,24 +38,26 @@
 
     
 
-    // function preventFn(event) {
-    //   if (
-    //     event.keyCode === 116 ||  // F5
-    //     (event.ctrlKey && event.keyCode === 82) || // Ctrl + R
-    //     (event.metaKey && event.keyCode === 82) || // Cmd + R
-    //     (event.ctrlKey && event.keyCode === 87) || // Ctrl + W
-    //     (event.metaKey && event.keyCode === 87)    // Cmd + W
-    //     ) {
-    //     event.preventDefault();
-    //     event.stopPropagation();
-    //   }
-    // }
-    // document.addEventListener('keydown', preventFn, true); 
+    function preventFn(event) {
+      if (
+        event.keyCode === 116 ||  // F5
+        (event.ctrlKey && event.keyCode === 84) || // Ctrl + T
+        (event.metaKey && event.keyCode === 84) || // Cmd + T
+        (event.ctrlKey && event.keyCode === 82) || // Ctrl + R
+        (event.metaKey && event.keyCode === 82) || // Cmd + R
+        (event.ctrlKey && event.keyCode === 87) || // Ctrl + W
+        (event.metaKey && event.keyCode === 87)    // Cmd + W
+        ) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+    document.addEventListener('keydown', preventFn, true); 
 
-    // window.onbeforeunload = confirmExit;
-    // function confirmExit() {
-    //   return "You have attempted to leave this page. Are you sure?";
-    // }
+    window.onbeforeunload = confirmExit;
+    function confirmExit() {
+      return "You have attempted to leave this page. Are you sure?";
+    }
   </script>
   <title>WISP Desktop</title>
 </head>
