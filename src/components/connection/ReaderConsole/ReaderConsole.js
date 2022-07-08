@@ -8,7 +8,7 @@ const ReaderConsole = (props) => {
     // bottomElement.current.scrollIntoView();
 
     useEffect(() => {
-        bottomElement.current.scrollIntoView({ behavior: "smooth", block: 'nearest', inline: 'start'});
+        bottomElement.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
     }
     , [readerLogs]);
 

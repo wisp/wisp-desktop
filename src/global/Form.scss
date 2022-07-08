@@ -49,6 +49,11 @@ input {
     }
 }
 
+.outlined-group {
+    border-radius: $smallRadius;
+    border: 1px solid $gray6;
+}
+
 .status-group {
     display: flex;
     flex-wrap: wrap;

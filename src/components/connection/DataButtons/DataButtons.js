@@ -17,7 +17,7 @@ const DataButtons = (props) => {
     const [setTagData, setTagDataRecent] = useContext(TagDataModifiers);
     const [clearModal, setClearModal] = useState(false);
     const [loadModal, setLoadModal] = useState(false);
-    const [connection,] = useContext(Connection);
+    const connectionStatus = useContext(Connection).connectionStatus;
 
     let newDataToLoad = [];
 
@@ -62,7 +62,7 @@ const DataButtons = (props) => {
                 size='small'
                 variant="outlined"
                 color="error"
-                disabled={!availableToClear || connection.status.connected}
+                disabled={!availableToClear || connectionStatus.isInventorying}
                 sx={{ width: "32%", mr: 1 }}
                 onClick={() => {
                     clearData();
@@ -75,7 +75,7 @@ const DataButtons = (props) => {
                 size='small'
                 variant="outlined"
                 color="primary"
-                disabled={!availableToClear || connection.status.connected}
+                disabled={!availableToClear || connectionStatus.isInventorying}
                 sx={{ width: "31%", mr: 1 }}
                 onClick={() => {
                     saveData();
@@ -115,7 +115,7 @@ const DataButtons = (props) => {
                 variant="outlined"
                 color="primary"
                 size='small'
-                disabled={availableToClear || connection.status.connected}
+                disabled={availableToClear || connectionStatus.isInventorying}
                 sx={{ width: "31%", mr: 0 }}
                 onClick={() => {
                     // loadData();

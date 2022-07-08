@@ -1,27 +1,37 @@
 import './Filter.scss';
 import Icon from 'components/Icon/Icon';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { FormGroup, Tooltip } from '@mui/material';
 import { Connection } from 'dataManagement/ConnectionContext';
 import ChipList from 'components/ChipList/ChipList';
+import * as yup from 'yup';
+import { useAlert } from 'react-alert';
+
+const validation = yup.object({
+    whitelist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9]{4}$', 'Invalid WISP ID')),
+    blacklist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9]{4}$', 'Invalid WISP ID')),
+});
 
 const Filter = (props) => {
-    const [connection, setConnection] = useContext(Connection);
+    const alert = useAlert();
+    const [filters, setFilters] = useContext(Connection).filter;
 
-    function setFilter(filter) {
-        setConnection({
-            ...connection,
-            filters: {
-                ...connection.filters,
-                ...filter
-            }
+    const updateFilter = (newFilter) => {
+        validation.validate(newFilter).then(() => {
+            setFilters({ ...filters, ...newFilter });
+        }).catch(err => {
+            alert.show(err.message, { title: "", timeout: 3000, type: 'error', icon: 'close' });
         });
     }
+
+    // useEffect(() => {
+    //     changeFilters(filters.whitelist, filters.blacklist);
+    // }, [filters]);
 
 
     return (
         <div className="filter">
-            <h2>Tag Filtering</h2>
+            <h2>Filtering</h2>
             <h3>Tags are filtered by their WISP IDs&nbsp;&nbsp;
                 <Tooltip title="The last 4 characters of a tag's EPC is its WISP ID" placement="right">
                     <span><Icon name="info" small /></span>
@@ -33,21 +43,19 @@ const Filter = (props) => {
                     variant="filled"
                     color="success"
                     label="Whitelist"
-                    // helperText="Invalid WISP ID"
-                    // error
                     sx={{ mb: 1 }}
-                    // placeholder="WISP ID"
-                    value={connection.filters.whitelist}
-                    onChange={(value) => setFilter({ whitelist: value })}
+                    placeholder="WISP ID"
+                    value={filters.whitelist}
+                    onChange={(arr) => updateFilter({ whitelist: arr })}
                 />
                 <ChipList
                     variant="filled"
                     color="error"
                     label="Blacklist"
-                    helperText=""
-                    // placeholder="WISP ID"
-                    value={connection.filters.blacklist}
-                    onChange={(value) => setFilter({ blacklist: value })}
+                    sx={{ mb: 1 }}
+                    placeholder="WISP ID"
+                    value={filters.blacklist}
+                    onChange={(arr) => updateFilter({ blacklist: arr })}
                 />
             </FormGroup>
         </div>

@@ -1,15 +1,15 @@
-@import '/src/global/Global.scss';
+@import "/src/global/Global.scss";
 
 .recent-tags-table-container {
     width: 100%;
     height: 100%;
     padding: 5px 10px;
     box-sizing: border-box;
-    
+
     table {
         text-align: left;
         width: 100%;
-        border-collapse: collapse; 
+        border-collapse: collapse;
 
         thead th {
             font-weight: 500;
@@ -26,13 +26,12 @@
             &:hover .sorted-indicator .hover-sort-indicator {
                 display: inline;
             }
-        
+
             .sorted-indicator {
                 display: inline-block;
                 width: 0;
                 color: $primary;
             }
-
         }
 
         tbody {
@@ -41,7 +40,6 @@
             tr {
                 border-top: 2px solid $gray8;
             }
-
         }
 
         td {
@@ -65,9 +63,17 @@
         //     visibility: visible;
         // }
 
-        tr:hover {
-            .action-icons {
-                visibility: visible;
+        tr {
+            color: $gray2;
+            &:hover {
+                color: $primary;
+                font-weight: 400;
+                .icon {
+                    color: $primary-light;
+                }
+                .action-icons {
+                    visibility: visible;
+                }
             }
         }
     }

@@ -28,7 +28,7 @@ const widgets = {
         defaultSize: [4, 5]
     },
     Graph: {
-        title: "RSSI Graph",
+        title: "Chart",
         component: <Graph/>,
         icon: "insert_chart",
         maxSize: [null, null],

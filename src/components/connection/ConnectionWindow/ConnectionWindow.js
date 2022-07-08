@@ -3,20 +3,21 @@ import './ConnectionWindow.scss';
 import WindowBar from 'components/window/WindowBar/WindowBar';
 import Icon from 'components/Icon/Icon';
 import React, { useState, useContext } from 'react';
-import Inventory from 'components/connection/Inventory/Inventory';
+import Network from 'components/connection/Network/Network';
 import ConnectionStatus from 'components/connection/ConnectionStatus/ConnectionStatus';
 import Filter from 'components/connection/Filter/Filter';
+import Inventory from 'components/connection/Inventory/Inventory';
 import { Connection } from 'dataManagement/ConnectionContext';
 import DataButtons from 'components/connection/DataButtons/DataButtons';
-
+import ErrorBoundary from 'components/ErrorBoundary/ErrorBoundary';
 
 
 const ConnectionWindow = (props) => {
 
     const [collapsedWindow, setCollapsed] = useState(false);
-    const [connection, setConnection] = useContext(Connection);
+    const connectionStatus = useContext(Connection).connectionStatus;
 
-    const barColor = connection.status.connected ? "green" : "red";
+    const barColor = connectionStatus.isInventorying ? 'green' : connectionStatus.isConnected ? "yellow" : "red";
 
     if (collapsedWindow) {
         return (
@@ -29,7 +30,7 @@ const ConnectionWindow = (props) => {
                             Connection
                         </div>
                         <div className='bottom'>
-                            {connection.status.connected ? "Connected" : "Disconnected"}
+                            {connectionStatus.isInventorying ? 'Inventory' : connectionStatus.isConnected ? "Idle" : "Disconnected"}
                         </div>
                     </div>
                 </div>
@@ -47,13 +48,26 @@ const ConnectionWindow = (props) => {
                 />}
             />
             <div className="window-content">
-                <Inventory />
-                <div className='spacer-4'></div>
-                <Filter />
-                <div className='spacer-4'></div>
-                <ConnectionStatus />
-                <div className='spacer-4'></div>
-                <DataButtons />
+                <ErrorBoundary>
+                    <Network />
+                </ErrorBoundary>
+                <div className='spacer-3'></div>
+                <ErrorBoundary>
+                    <Inventory />
+                </ErrorBoundary>
+                <div className='spacer-3'></div>
+                <ErrorBoundary>
+                    <Filter />
+                </ErrorBoundary>
+                <div className='spacer-3'></div>
+                <ErrorBoundary>
+                    <ConnectionStatus />
+                </ErrorBoundary>
+                <div className='spacer-3'></div>
+                <ErrorBoundary>
+                    <DataButtons />
+                </ErrorBoundary>
+                <div className='spacer-2'></div>
             </div>
         </div>
     );

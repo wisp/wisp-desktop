@@ -1,227 +1,132 @@
-import './Inventory.scss';
-
-// import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { useFormik } from 'formik';
 import * as yup from 'yup';
 
 import React, { useState, useContext, useRef } from 'react';
-import Modal from 'components/Modal/Modal';
-// import { Button } from 'components/Button/Button';
 import Icon from 'components/Icon/Icon';
 import { Connection } from 'dataManagement/ConnectionContext';
-import { TextField, FormGroup, Button, IconButton, Tooltip, Checkbox, FormControlLabel } from '@mui/material';
+import { TextField, FormGroup, Button, Switch, FormControlLabel, IconButton, ToggleButton, Tooltip, MenuItem, Select } from '@mui/material';
+import { useAlert } from 'react-alert';
 import ChipList from 'components/ChipList/ChipList';
-import ReaderConsole from 'components/connection/ReaderConsole/ReaderConsole';
 
-// TODO: Switch to Formik so we can use validation.
-//       Make the modal save values before it's modified so that if closed, we can restore the old values.
 
-const validation = yup.object({
-    host: yup.string('Enter the reader hostname').required(),
-    port: yup.number('Must be a number').min(1, 'Must be between 1-65535').max(65535, 'Must be between 1-65535')
-})
+// const modes = {
+//     0: { name: "0 (WISP 5/6)", description: "Max Throughput, Tari: 7.14ms" },
+//     1: { name: "1", description: "Hybrid, M: 2, Tari: 12.5ms" },
+//     2: { name: "2 (WISP 4)", description: "Dense Reader, M: 4, Tari: 25.0ms" },
+//     3: { name: "3", description: "Dense Reader, M: 8, Tari: 25.0ms" },
+//     4: { name: "4", description: "Max Miller, M: 4, Tari: 7.14ms" },
+//     1000: { name: "1000 (Autoset)", description: "Max Miller, M: 4, Tari: 7.14ms" },
+// }
+
+const modes = {
+    0: { name: "0: Max Throughput", description: "Tari: 7.14ms" },
+    1: { name: "1: Hybrid", description: "M: 2, Tari: 12.5ms" },
+    2: { name: "2: Dense Reader", description: "M: 4, Tari: 25.0ms" },
+    3: { name: "3: Dense Reader", description: "M: 8, Tari: 25.0ms" },
+    4: { name: "4: Max Miller", description: "M: 4, Tari: 7.14ms" },
+    // 1000: { name: "1000 Reader Autoset", description: "Parameters set by reader" },
+    // 1001: { name: "1001 Reader Autoset Static", description: "Parameters set by reader" },
+}
+
+const antennaSchema = yup.array().of(yup.number("Antenna must be a number").min(1, "Antenna must be between 1 and 4").max(4, "Antenna must be between 1 and 4")).required();
 
 const Inventory = (props) => {
+    const alert = useAlert();
+    const context = useContext(Connection);
+    const functions = context.connectionFunctions;
+    const connectionStatus = context.connectionStatus;
+    const [showConsole, setShowConsole] = useState(false);
 
-    const [connection, setConnection] = useContext(Connection);
-    const [showModal, setShowModal] = useState(false);
+    const [params, setParams] = useState({
+        antennas: [1],
+        power: 60,
+        mode: 0,
+    });
 
-    const connectionRef = useRef();
-    connectionRef.current = connection;
+    const updateParams = (e) => {
+        setParams({
+            ...params,
+            [e.target.name]: e.target.value
+        });
+    }
 
-    const formik = useFormik({
-        initialValues: {
-            host: connection.settings.host,
-            port: connection.settings.port,
-        },
-        validationSchema: validation,
-        onSubmit: (values) => {
-            alert(JSON.stringify(values, null, 2));
-        },
-    })
-
-    function toggleConnection() {
-
-        if (connection.status.connected) {
-            window.eel.GUIPauseInventory()
-            setConnection({
-                ...connection,
-                status: {
-                    ...connection.status,
-                    connected: false,
-                }
-            });
+    const toggleInventory = async () => {
+        if (connectionStatus.isInventorying) {
+            await functions.stopInventory()
         }
         else {
-            const params = connection.settings;
-            const filters = connection.filters;
-            console.log("sending to reader:", connection.settings);
-            window.eel.GUIStartInventory(params.host, parseInt(params.port), params.antennas, params.tari, params.power, params.mode);
-            window.eel.changeFilters(filters.whitelist, filters.blacklist)
-            setConnection({
-                ...connection,
-                status: {
-                    connected: true,
-                    started: Math.floor(Date.now() / 1000),
-                }
-            }, () => {
-                console.log("new status:", connection.status);
-            });
+            await functions.startInventory(params.antennas, params.power, params.mode)
         }
-
-        // setConnection({...connection, status: {...connection.status, started: Date.now() / 1000}});
     }
 
-    function setSettings(params) {
-        setConnection({ ...connection, settings: { ...connection.settings, ...params } });
+    const updateAntennas = (arr) => {
+        antennaSchema.validate(arr).then(() => {
+            const numArr = arr.map(str => parseInt(str));
+            setParams({
+                ...params,
+                antennas: numArr
+            });
+        }).catch(err => {
+            alert.show(err.message, { title: "", timeout: 3000, type: 'error', icon: 'close' });
+        });
     }
+
 
     return (
-        <form>
-            <h2>Reader Settings</h2>
-            <FormGroup sx={{ mt: 0.5 }} >
-                <div>
-                    <TextField
-                        disabled={connection.status.connected}
-                        id="filled-basic"
-                        label="Hostname"
-                        variant="filled"
-                        sx={{ mr: 1, width: '73%' }}
-                        value={connection.settings.host}
-                        onChange={(e) => setSettings({ host: e.target.value })}
-                    />
-                    <TextField
-                        disabled={connection.status.connected}
-                        id="filled-basic"
-                        label="Port"
-                        variant="filled"
-                        sx={{ width: '24%' }}
-                        value={connection.settings.port}
-                        onChange={(e) => setSettings({ port: e.target.value })}
-                    />
-                </div>
-            </FormGroup>
-
-            {/* <form onSubmit={formik.handleSubmit}>
-                <FormGroup sx={{ mt: 0.5 }} >
-                    <div>
-                        <TextField
-                            disabled={connection.status.connected}
-                            label="Hostname"
-                            variant="filled"
-                            sx={{ mr: 1, width: '73%' }}
-                            value={formik.values.host}
-                            onChange={formik.handleChange}
-                            error={formik.touched.host && Boolean(formik.errors.host)}
-                            helperText={formik.touched.host && formik.errors.host}
-                        />
-                        <TextField
-                            disabled={connection.status.connected}
-                            label="Port"
-                            variant="filled"
-                            sx={{ width: '24%' }}
-                            value={formik.values.port}
-                            onChange={formik.handleChange}
-                            error={formik.touched.port && Boolean(formik.errors.port)}
-                            helperText={formik.touched.port && formik.errors.port}
-                        />
-                    </div>
-                </FormGroup>
-            </form> */}
-
-            {
-                connection.settings.debugLogs &&
-                <ReaderConsole />
-            }
+        <div>
+            <h2>Inventory</h2>
             <FormGroup sx={{ mt: 1 }}>
-                <div className='form-group right top-space'>
-                    <Tooltip title="Additional settings">
-                        <IconButton variant='contained' size="small" disabled={connection.status.connected} onClick={() => setShowModal(true)}>
-                            <Icon name="settings" />
-                        </IconButton>
-                    </Tooltip>
-                    <Button
-                        variant={connection.status.connected ? 'outlined' : 'contained'}
-                        onClick={(e) => toggleConnection()}
-                        color={connection.status.connected ? 'error' : 'primary'}
-                        sx={{ width: '160px' }}
-                        level={connection.status.connected ? "2" : "1"}
-                    >
-                        {connection.status.connected ? "Stop" : "Start"} Inventory
-                    </Button>
-                </div>
-            </FormGroup>
-            <Modal show={showModal} title="Additional Reader Settings" close={() => setShowModal(false)}>
                 <div className='spacer-1'></div>
                 <div>
-                    <TextField
-                        label="Tari"
-                        variant="filled"
-                        sx={{ mr: 1, width: '49%' }}
-                        value={connection.settings.tari}
-                        onChange={(e) => setSettings({ tari: e.target.value })}
-                    />
                     <ChipList
                         color="primary"
                         label="Antennas"
                         sx={{ width: '49%', display: 'inline-block' }}
                         variant="filled"
-                        value={connection.settings.antennas}
-                        onChange={(value) => setSettings({
-                            antennas: value.map(str => {
-                                return Number(str);
-                            })
-                        })}
-                    />
-                </div>
-                <div className='spacer-2'></div>
-                <div>
-                    <TextField
-                        label="Power"
-                        variant="filled"
-                        sx={{ mr: 1, width: '49%' }}
-                        value={connection.settings.power}
-                        onChange={(e) => setSettings({ power: e.target.value })}
+                        value={params.antennas}
+                        disabled={connectionStatus.isInventorying}
+                        onChange={updateAntennas}
                     />
                     <TextField
-                        label="Mode"
+                        label="TX power"
                         variant="filled"
-                        sx={{ width: '49%' }}
-                        value={connection.settings.mode}
-                        onChange={(e) => setSettings({ mode: e.target.value })}
+                        sx={{ ml: 1, width: '48%' }}
+                        value={params.power}
+                        name="power"
+                        disabled={connectionStatus.isInventorying}
+                        onChange={updateParams}
                     />
                 </div>
-                <div className='spacer-2'></div>
-                <FormControlLabel
-
-                    control={
-                        <Checkbox
-                            onClick={(e) => setSettings({ debugLogs: !connection.settings.debugLogs })}
-                            checked={connection.settings.debugLogs}
-                        />
-                    }
-                    label="Display all reader debugging logs"
-                />
+                <div className='spacer-15'></div>
+                <TextField
+                    variant="filled"
+                    label="Mode identifier"
+                    select
+                    disabled={connectionStatus.isInventorying}
+                    value={params.mode}
+                    name="mode"
+                    onChange={updateParams}
+                    helperText={modes[params.mode].description}
+                >
+                    {Object.keys(modes).map(key => {
+                        return <MenuItem key={key} value={key}>{modes[key].name}</MenuItem>
+                    })}
+                </TextField>
+            </FormGroup>
+            <FormGroup sx={{ mt: 1 }}>
                 <div className='form-group right top-space'>
-                    <Button level="5" onClick={() => {
-                        setSettings(
-                            {
-                                tari: 7140,
-                                antennas: [1],
-                                power: 0,
-                                mode: 0,
-                            }
-                        );
-                    }
-                    }>
-                        Reset
-                    </Button>
-                    <Button variant='contained' onClick={() => setShowModal(false)}>
-                        Save
+                    <Button
+                        disabled={connectionStatus.isWaiting || !connectionStatus.isConnected}
+                        variant={connectionStatus.isInventorying ? 'outlined' : 'contained'}
+                        onClick={(e) => toggleInventory()}
+                        color={connectionStatus.isInventorying ? 'error' : 'primary'}
+                        sx={{ width: '160px' }}
+                        level={connectionStatus.isInventorying ? "2" : "1"}
+                    >
+                        {(connectionStatus.isInventorying ? "Stop" : "Start") + " inventory"}
                     </Button>
                 </div>
-            </Modal>
-        </form >
+            </FormGroup>
+        </div>
 
     )
 }

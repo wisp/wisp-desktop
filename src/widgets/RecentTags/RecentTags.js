@@ -4,7 +4,7 @@ import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { useTable, useSortBy } from 'react-table';
 import { TagDataRecent } from 'dataManagement/EelListener';
 import Icon from 'components/Icon/Icon';
-import { getRelativeTime, getFormattedData, getWispType } from 'global/helperFunctions';
+import { getRelativeTime, getWispType } from 'global/helperFunctions';
 import { IconButton, Tooltip } from '@mui/material';
 import { Connection } from 'dataManagement/ConnectionContext';
 
@@ -12,10 +12,12 @@ import { Connection } from 'dataManagement/ConnectionContext';
 //       Add buttons for filtering each tag (add, remove from whitelist, blacklist).
 
 const RecentTags = (props) => {
-    const [connection, setConnection] = useContext(Connection)
+    // const connectionStatus = useContext(Connection)
     const context = useContext(TagDataRecent);
     const [, updateState] = useState();
     const forceUpdate = useCallback(() => updateState({}), []);
+
+    const [filters, setFilters] = useContext(Connection).filter;
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -69,24 +71,18 @@ const RecentTags = (props) => {
                 Cell: ({ cell }) => {
                     const wispId = cell.row.values.epc.slice(cell.row.values.epc.length - 4);
                     return (
-                        // <button value={cell.row.values.name} onClick={props.handleClickGroup}>
-
-                        //     {cell.row.values.epc}
-                        // </button>
                         <div>
-                            {connection.filters.whitelist.includes(wispId) || connection.filters.blacklist.includes(wispId) ?
+                            {filters.whitelist.includes(wispId) || filters.blacklist.includes(wispId) ?
                                 <span>
                                     <Tooltip title="Remove filter">
                                         <IconButton
                                             size="small"
                                             sx={{ m: -0.5 }}
                                             onClick={() => {
-                                                setConnection({
-                                                    ...connection,
-                                                    filters: {
-                                                        blacklist: connection.filters.blacklist.filter(e => e !== wispId),
-                                                        whitelist: connection.filters.whitelist.filter(e => e !== wispId)
-                                                    }
+                                                setFilters({
+                                                    ...filters,
+                                                    blacklist: filters.blacklist.filter(e => e !== wispId),
+                                                    whitelist: filters.whitelist.filter(e => e !== wispId)
                                                 })
                                             }}>
                                             <Icon name="filter_alt_off" small />
@@ -102,12 +98,9 @@ const RecentTags = (props) => {
                                             size="small"
                                             sx={{ m: -0.5, mr: 0.1 }}
                                             onClick={() => {
-                                                setConnection({
-                                                    ...connection,
-                                                    filters: {
-                                                        ...connection.filters,
-                                                        whitelist: [...connection.filters.whitelist, wispId]
-                                                    }
+                                                setFilters({
+                                                    ...filters,
+                                                    whitelist: [...filters.whitelist, wispId]
                                                 })
                                             }}>
                                             <Icon name="check_circle" small />
@@ -118,12 +111,9 @@ const RecentTags = (props) => {
                                             size="small"
                                             sx={{ m: -0.5 }}
                                             onClick={() => {
-                                                setConnection({
-                                                    ...connection,
-                                                    filters: {
-                                                        ...connection.filters,
-                                                        blacklist: [...connection.filters.blacklist, wispId]
-                                                    }
+                                                setFilters({
+                                                    ...filters,
+                                                    blacklist: [...filters.blacklist, wispId]
                                                 })
                                             }}>
                                             <Icon name="block" small />
@@ -138,11 +128,13 @@ const RecentTags = (props) => {
                 }
             },
         ],
-        [connection]
+        [filters]
     )
 
-    let data = [];
-    data = context.data;
+    const data = [];
+    for (const wispId of Object.keys(context.data)) {
+        data.push(context.data[wispId]);
+    }
 
     const tableInstance = useTable({
         columns,

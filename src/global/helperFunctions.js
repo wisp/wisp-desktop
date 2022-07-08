@@ -1,3 +1,5 @@
+export const hostNameRegex = /^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$/;
+
 export function getRelativeTime(time, starting = "", ending = 'ago') {
 
     if (time == -1) {
@@ -27,7 +29,7 @@ export function getRelativeTime(time, starting = "", ending = 'ago') {
     } else if (delta < day) {
         string = Math.floor(delta / hour) + ' hours ' + ending;
     } else {
-        string = new Date(time).toLocaleTimeString([], {month: 'numeric', day: 'numeric', year: '2-digit', hour: 'numeric', minute: '2-digit'})
+        string = new Date(time).toLocaleTimeString([], { month: 'numeric', day: 'numeric', year: '2-digit', hour: 'numeric', minute: '2-digit' })
     }
 
     if (starting == "") {
@@ -39,7 +41,7 @@ export function getRelativeTime(time, starting = "", ending = 'ago') {
 
 export function getWispType(type) {
     const tagTypes = {
-        '0B': 'Acknowledgement',
+        '0B': 'Accelerometer',
     }
     if (type in tagTypes) {
         return tagTypes[type];
@@ -77,4 +79,40 @@ export function getRecentDataFromArray(array) {
         }
     }
     return recentData;
+}
+
+export function getVariableListFromRecentTags(recentTags) {
+    const variableList = [];
+    if (recentTags) {
+        // for (let i = 0; i < recentTags.length; i++) {
+        //     const tag = recentTags[i];
+        //     if (tag.formatted) {
+        //         // get list of keys
+        //         console.log(tag)
+        //         const keys = Object.keys(tag.formatted);
+        //         console.log(keys)
+        //         for (let j = 0; j < keys.length; j++) {
+        //             const key = keys[j];
+        //             if (!(key in variableList)) {
+        //                 variableList.push(key);
+                        
+        //             }
+        //         }
+        //     }
+        // }
+        const keys = Object.keys(recentTags);
+        for (const key of keys) {
+            const tag = recentTags[key];
+            if (tag.formatted) {
+                const varKeys = Object.keys(tag.formatted);
+                for (let j = 0; j < varKeys.length; j++) {
+                    const varKey = varKeys[j];
+                    if (!(varKey in variableList)) {
+                        variableList.push(varKey);
+                    }
+                }
+            }
+        }
+    }
+    return variableList;
 }

@@ -7,10 +7,14 @@
     box-shadow: none;
     transition: width 0.2s ease-in-out;
 
-    border-right: 3px solid $green2;
+    border-right: 5px solid $green2;
+
+    &.yellow {
+        border-color: $yellow4;
+    }
 
     &.red {
-        border-right: 3px solid $red2;
+        border-color: $red2;
     }
 
     &>.window-content {

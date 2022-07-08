@@ -1,0 +1,45 @@
+@import "global/Global.scss";
+
+.error-container {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $red1;
+    padding: 30px;
+    box-sizing: border-box;
+    border-radius: 5px;
+
+    h2 {
+        color: $red3;
+    }
+
+    .error-details {
+        white-space: pre-wrap;
+        font-family: 'IBM Plex Mono';
+        font-size: 14px;
+    }
+
+    .retry {
+        font-family: inherit;
+        font-weight: 700;
+        color: $gray4;
+        background-color: $gray8;
+        border: none;
+        padding: 5px 8px;
+        border-radius: 5px;
+        float: right;
+        box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, 0.1);
+        transition: 0.12s;
+    }
+
+    .retry:hover {
+        background: $gray7;
+        color: $gray2;
+    }
+
+    .retry:active {
+        background: $gray6;
+        color: $gray2;
+    }
+}

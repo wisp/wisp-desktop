@@ -6,6 +6,7 @@ import eel
 import queue
 import logging
 import time
+import os
 
 import tagDict
 
@@ -66,12 +67,12 @@ class RFIDReader:
                 'RO_ACCESS_REPORT').get('TagReportData')
 
             for tag in tags:
-
                 # The EPC is currently bytes, and eel doesn't like it when
                 # bytes are passed to the JS, so we need to convert to a
                 # string first.
                 newTag = {}
                 newTag['seen'] = time.time()
+                # print("Tag seen:", newTag['seen'])
 
                 epc = str(tag['EPC-96'], 'utf-8').upper()
                 newTag['wispId'] = epc[20:24]
@@ -79,8 +80,8 @@ class RFIDReader:
                 if ((not self.whitelist or newTag['wispId'] in self.whitelist) and newTag['wispId'] not in self.blacklist):
                     newTag['epc'] = epc
                     newTag['wispType'] = epc[0:2]
-                    newTag['wispData'] = epc[2:18]
-                    newTag['wispHwRev'] = epc[18:20]
+                    newTag['wispData'] = epc[2:20]
+                    # newTag['wispHwRev'] = epc[18:20]
                     newTag['rssi'] = tag['PeakRSSI'][0]
 
                     # Here we create formatted versions of the data. A
@@ -98,7 +99,7 @@ class RFIDReader:
                     self.count += 1
 
         except Exception as e:
-            # print(e)
+            print("Exception reading tag:", e)
             pass
 
 
@@ -110,7 +111,8 @@ class RFIDReader:
             eel.createAlert("error", "Inventory already started", "Stop the inventory before starting a new one")
         else:
             self.isConnected = True
-            self.fac = LLRPClientFactory(report_every_n_tags=1,
+            self.fac = LLRPClientFactory(
+                                        report_every_n_tags=1,
                                         antennas=antennas,
                                         tx_power=tx_power,
                                         start_inventory=True,
@@ -147,7 +149,7 @@ class RFIDReader:
             self.isConnected = False
             eel.createAlert("info", "Inventory stopped", "Stopped accepting tags from the reader", "cable")
         else:
-            eel.createAlert("error", "Inventory has not started", "Cannot stop an inventory that has not started", "cable")
+            eel.createAlert("error", "Inventory not started", "Cannot stop an inventory that has not started", "cable")
     
     def getAlive(self):
         return self.reader_thread.is_alive()
@@ -157,14 +159,15 @@ class RFIDReader:
         self.blacklist = blacklist
 
 
-
 global reader
 reader = RFIDReader()
 
-
 @eel.expose
-def GUIStartInventory(host, port=LLRP_PORT, antennas=[1], tari=7140, tx_power=0, mode_identifier=0):
+def GUIStartInventory(host, port=LLRP_PORT, antennas=[1], tari=7140, tx_power=0, mode_identifier=-1):
     if (host):
+        if (mode_identifier == -1):
+            mode_identifier = None
+            
         print("Attempting to start inventory with host: " + host)
         reader.startInventory(host, port, antennas, tari, tx_power, mode_identifier)
         if (not reader.getAlive()):
@@ -185,11 +188,6 @@ def changeFilters(whitelist, blacklist):
     reader.changeFilters(whitelist, blacklist)
 
 
-# GUIStartInventory('speedway-00-05-56.local')
-
-def test():
-    print("Hello")
-
-
 eel.init('public')
 eel.start({"port": 3000}, host="localhost", port=8888, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+# eel.start()

@@ -5,10 +5,12 @@ const ChipList = (props) => {
         <Autocomplete
             multiple
             options={[]}
+            
             freeSolo
             sx={{display: 'inline-block', ...props.sx}}
             value={props.value}
             clearOnBlur
+            disabled={props.disabled}
             onChange={(event, newValue) => {
                 props.onChange(newValue);
             }}
@@ -36,6 +38,7 @@ const ChipList = (props) => {
                     label={props.label}
                     color={props.color}
                     placeholder={props.placeholder}
+                    onBlur={props.onBlur}
                 />
             )}
         />

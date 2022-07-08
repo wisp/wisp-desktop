@@ -8,6 +8,7 @@ import { Responsive, WidthProvider } from "react-grid-layout";
 import { useEffect, useRef, useState, cloneElement } from 'react';
 import Icon from 'components/Icon/Icon';
 import ButtonMenu from 'components/ButtonMenu/ButtonMenu'
+import ErrorBoundary from 'components/ErrorBoundary/ErrorBoundary';
 
 import widgets from 'widgets/widgets.js';
 import { MenuItem, ListItemIcon } from '@mui/material';
@@ -49,7 +50,8 @@ const WindowManager = (props) => {
                 className="layout"
                 rowHeight={50}
                 autoSize={false}
-                draggableCancel=".window-content"
+                draggableCancel=".window-content, .modal"
+                draggableHandle=".window-bar"
                 margin={[15, 15]}
             >
 
