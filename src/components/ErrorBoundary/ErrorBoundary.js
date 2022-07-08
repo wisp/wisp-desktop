@@ -21,7 +21,7 @@ class ErrorBoundary extends React.Component {
                 <div className="error-container">
                     <div style={{  }}>
                         <h2>A rendering error occurred</h2>
-                        <button className='retry' onClick={()=>{this.forceUpdate()}}>RETRY</button>
+                        {/* <button className='retry' onClick={()=>{this.forceUpdate()}}>RETRY</button> */}
                         <p>
                             <details className='error-details'>
                                 {this.state.error && this.state.error.toString()}

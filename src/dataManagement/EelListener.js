@@ -99,23 +99,26 @@ const EelListener = (props) => {
     }
 
     useEffect(() => {
-        // Handle alerts that come from the Python side and display them in the UI
+        const tagListener = document.addEventListener('acceptTag', (event) => {
+            const tagData = event.detail;
+            acceptTag(tagData);
+        });
 
-        props.eel.expose(createAlert)
+        const alertListener = document.addEventListener('createAlert', (event) => {
+            const { type, title, message, icon } = event.detail;
+            createAlert(type, title, message, icon);
+        });
 
-        
-        
-        props.eel.expose(acceptTag)
-
-        
-        
-        props.eel.expose(readerLog)
+        const readerLogListener = document.addEventListener('readerLog', (event) => {
+            const message = event.detail;
+            readerLog(message);
+        });
 
 
         return () => {
-            // document.removeEventListener('alertEvent', alertListener)
-            // document.removeEventListener('newTagEvent', tagListener)
-            // document.removeEventListener('readerLogEvent', readerLogListener)
+            document.removeEventListener('acceptTag', alertListener)
+            document.removeEventListener('createAlert', tagListener)
+            document.removeEventListener('readerLog', readerLogListener)
         }
     }, []);
 

@@ -4,7 +4,7 @@ import logging
 import time
 import atexit
 import tagDict
-
+import sys
 
 class SllurpHandler(logging.StreamHandler):
     def __init__(self):
@@ -82,16 +82,19 @@ class RFIDReader:
         self.fac_args = self.FAC_ARGS_DEFAULT.copy()
         
     def onConnect(self, reader, state):
+        print("Received connect event from reader")
         self.isConnected = True
         self.forceFrontendUpdate()
 
     def onDisconnect(self, reader, state):
+        print("Received disconnect event from reader")
         self.isConnected = False
         self.isInventoryRunning = False
         self.forceFrontendUpdate()
         print("Reader disconnected!!")
 
     def onInventory(self, reader, state):
+        print("Received inventory event from reader")
         self.isInventoryRunning = True
         self.forceFrontendUpdate()
 
@@ -102,7 +105,7 @@ class RFIDReader:
             return
         
     def connect(self, host, port):
-        print("Running Connect")
+        print("Running reader.connect")
         self.resetReaderConfig()
         config = LLRPReaderConfig(self.fac_args)
         self.reader = LLRPReaderClient(host, port, config)
@@ -125,15 +128,16 @@ class RFIDReader:
             time.sleep(0.1)
 
         if (self.isConnected):
-            print("Reader connected!")
+            print("Reader connected")
             return True
         
-        print("Reader connection timed out.")
+        print("Reader connection timed out")
         return False
 
     def disconnect(self):
+        print("Running reader.disconnect")
         if not self.isConnected:
-            print("Reader already disconnected.")
+            print("Reader already disconnected")
             return False
 
         try: 
@@ -145,6 +149,7 @@ class RFIDReader:
             return False
 
     def startInventory(self):
+        print("Running reader.startInventory")
         if self.isConnected:
             if not self.isInventoryRunning:
                 try:
@@ -161,19 +166,18 @@ class RFIDReader:
                         time.sleep(0.1)
 
                     if (self.isInventoryRunning):
-                        print("Reader connected!")
+                        print("Inventory started")
                         return True
                     
-                    print("Failed to start inventory...disconnecting")
-                    self.disconnect()
+                    print("Failed to start inventory")
                     return False
                 except Exception as e:
                     print("Failed to start inventory: " + str(e))
                     return False
             else:
-                print("Inventory already running.")
+                print("Inventory already running")
         else:
-            print("Reader not connected.")
+            print("Reader not connected")
         return False
 
     def stopInventory(self):
@@ -187,9 +191,9 @@ class RFIDReader:
                     print("Failed to stop inventory: " + str(e))
                     return False
             else:
-                print("Inventory already stopped.")
+                print("Inventory already stopped")
         else:
-            print("Reader not connected.")
+            print("Reader not connected")
         return False
 
     def changeFilters(self, whitelist, blacklist):
@@ -251,7 +255,6 @@ class RFIDReader:
     
 
 rfid = RFIDReader()
-atexit.register(rfid.kill_all)
 
 @eel.expose
 def connect(host, port):
@@ -281,6 +284,18 @@ def changeFilters(whitelist, blacklist):
     rfid.changeFilters(whitelist, blacklist)
     return True
 
-eel.init('build')
-eel.start({"port": 3000}, host="localhost", port=8888, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
 
+def onScriptClose():
+    eel.closeGUI()
+    rfid.kill_all()
+
+atexit.register(onScriptClose)
+
+def onGUIClose(a,b):
+    print("GUI closed... killing")
+    rfid.kill_all()
+    sys.exit()
+
+
+eel.init('build')
+eel.start("index.html", host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])

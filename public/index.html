@@ -25,19 +25,6 @@
   <script src="http://localhost:8888/eel.js"></script>
   <script src="eelFunctions.js"></script>
   <script>
-    eel.set_host('http://localhost:8888')
-    // eel.expose(createAlert)
-    // eel.expose(acceptTag)
-    // eel.expose(readerLog)
-    
-    // eel.expose(acceptTag)
-    // function acceptTag(tagData) {
-    //   let tagEvent = new CustomEvent('newTagEvent', { detail: tagData });
-    //   document.dispatchEvent(tagEvent);
-    // }
-
-    
-
     function preventFn(event) {
       if (
         event.keyCode === 116 ||  // F5
@@ -47,12 +34,12 @@
         (event.metaKey && event.keyCode === 82) || // Cmd + R
         (event.ctrlKey && event.keyCode === 87) || // Ctrl + W
         (event.metaKey && event.keyCode === 87)    // Cmd + W
-        ) {
+      ) {
         event.preventDefault();
         event.stopPropagation();
       }
     }
-    document.addEventListener('keydown', preventFn, true); 
+    document.addEventListener('keydown', preventFn, true);
 
     window.onbeforeunload = confirmExit;
     function confirmExit() {

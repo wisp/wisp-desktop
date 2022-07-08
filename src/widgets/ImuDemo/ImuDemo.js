@@ -31,7 +31,7 @@ const ImuDemoInner = (props) => {
 
     const data = useContext(TagDataRecent).data;
     const keys = Object.keys(data);
-    let accelTag = {seen: 0};
+    let accelTag = {seen: 0, formatted: {x: 0, y: 0, z: 0}};
     for(const key of keys) {
         const thisTag = data[key];
         if (thisTag.wispType === '0B') {
