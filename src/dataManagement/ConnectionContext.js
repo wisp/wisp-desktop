@@ -3,6 +3,7 @@ import { useAlert } from 'react-alert';
 import * as yup from 'yup';
 
 import { hostNameRegex } from 'global/helperFunctions';
+import Alerts from 'components/Alerts/Alerts';
 
 
 const Connection = createContext({});
@@ -123,6 +124,13 @@ const ConnectionContext = (props) => {
         }
     }
 
+    const forceState = async (state) => {
+        if (state.isConnected != connectionStatusRef.current.isConnected || state.isInventorying != connectionStatusRef.current.isInventorying) {
+            alert.error("Something went wrong with the reader state", { title: "Unexpected reader state", icon: 'sync_problem' });
+        }
+        updateStatus(state);
+    }
+
     // const changeFilters = async (whitelist, blacklist) => {
     //     // This is likely the second time it's being validated, but it can't hurt
     //     // alert.info("updating filters")
@@ -155,6 +163,7 @@ const ConnectionContext = (props) => {
         startInventory,
         stopInventory,
         // changeFilters,
+        forceState,
     }
 
     return (

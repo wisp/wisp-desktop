@@ -51,7 +51,7 @@ const ImuDemoInner = (props) => {
             // const z = 50;
 
             const pitch = -180 * Math.atan(x / Math.sqrt(y * y + z * z)) / Math.PI;
-            const roll = -180 * Math.atan(y / Math.sqrt(x * x + z * z)) / Math.PI;
+            const roll = 180 * Math.atan(y / Math.sqrt(x * x + z * z)) / Math.PI;
             const yaw = 180 * Math.atan(z / Math.sqrt(x * x + z * z)) / Math.PI;
 
 

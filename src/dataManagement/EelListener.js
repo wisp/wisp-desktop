@@ -12,6 +12,7 @@ const maxUpdateInterval = 100;
 
 const EelListener = (props) => {
     const alert = useAlert();
+    const forceState = useContext(Connection).connectionFunctions.forceState;
 
     const [tagData, _setTagData] = useState([])
     const tagDataRef = useRef(tagData);
@@ -95,31 +96,13 @@ const EelListener = (props) => {
     }
 
     function forceStateUpdate(isConnected, isInventorying) {
-
+        // forceState({ isConnected, isInventorying });
     }
 
     useEffect(() => {
-        const tagListener = document.addEventListener('acceptTag', (event) => {
-            const tagData = event.detail;
-            acceptTag(tagData);
-        });
-
-        const alertListener = document.addEventListener('createAlert', (event) => {
-            const { type, title, message, icon } = event.detail;
-            createAlert(type, title, message, icon);
-        });
-
-        const readerLogListener = document.addEventListener('readerLog', (event) => {
-            const message = event.detail;
-            readerLog(message);
-        });
-
-
-        return () => {
-            document.removeEventListener('acceptTag', alertListener)
-            document.removeEventListener('createAlert', tagListener)
-            document.removeEventListener('readerLog', readerLogListener)
-        }
+        window.eel.expose(acceptTag, 'acceptTag');
+        window.eel.expose(createAlert, 'createAlert');
+        window.eel.expose(readerLog, 'readerLog');
     }, []);
 
     return (
