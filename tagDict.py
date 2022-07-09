@@ -20,12 +20,12 @@ def ackParser(d):
     return {
         'sin': {
             'value': math.sin(time.time()),
-            'unit': '',
+            'unit': 'for testing only',
             'label': 'sin'
         },
         'cos': {
             'value': math.cos(time.time()),
-            'unit': '',
+            'unit': 'for testing only',
             'label': 'cos'
         }
     }
@@ -48,19 +48,19 @@ def accelParser(d):
 
     return {
         'x': {
-            'value': scaleAndFlip(d[4:8]) * 0.87,
-            'unit': 'g',
-            'label': 'X'
+            'value': (scaleAndFlip(d[4:8]) * 0.87)*2,
+            'unit': 'unitless',
+            'label': 'X Acceleration'
         },
         'y': {
-            'value': scaleAndFlip(d[0:4]) * 0.886,
-            'unit': 'g',
-            'label': 'Y'
+            'value': (scaleAndFlip(d[0:4]) * 0.886)*2,
+            'unit': 'unitless',
+            'label': 'Y Acceleration'
         },
         'z': {
-            'value': -(scaleAndFlip(d[8:12]) - 100) * 1.034,
-            'unit': 'g',
-            'label': 'Z'
+            'value': (-(scaleAndFlip(d[8:12]) - 100) * 1.034)*2,
+            'unit': 'unitless',
+            'label': 'Z Acceleration'
         }
     }
 

@@ -106,7 +106,7 @@ export function getVariableListFromRecentTags(recentTags) {
                 for (let j = 0; j < varKeys.length; j++) {
                     const varKey = varKeys[j];
                     if (!(varKey in variableList)) {
-                        variableList.push(varKey);
+                        variableList.push({var: varKey, unit: tag.formatted[varKey].unit, label: tag.formatted[varKey].label});
                     }
                 }
             }

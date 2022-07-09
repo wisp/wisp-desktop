@@ -71,9 +71,6 @@ const GraphInner = (props) => {
 
     console.log(recentData);
     const varList = getVariableListFromRecentTags(recentData);
-    // const varList = ['sin', 'cos'];
-
-    // function toBlob
 
     function copyToClipboard() {
         const canvas = document.getElementById('chart');
@@ -104,7 +101,7 @@ const GraphInner = (props) => {
     return (
         <div className='graph-body'>
             <div className='graph-contain'>
-                <GraphBody data={data} options={graphOptions} varList={varList} />
+                <GraphBody data={data} options={graphOptions} />
             </div>
             <div className="graph-options" style={{ paddingTop: 20 }}>
                 <div className="form-group stretch">

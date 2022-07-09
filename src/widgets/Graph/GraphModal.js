@@ -92,7 +92,7 @@ const GraphModal = (props) => {
                     >
                         {props.varList &&
                             props.varList.map((variable) => {
-                                return <MenuItem value={variable}>{variable}</MenuItem>
+                                return <MenuItem value={variable.var}>{variable.label} ({variable.unit})</MenuItem>
                             })
                         }
                     </Select>
