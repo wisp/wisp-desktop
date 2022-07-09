@@ -129,6 +129,8 @@ class RFIDReader:
 
         if (self.isConnected):
             print("Reader connected")
+            time.sleep(2.25)  # Unfortunately, this is necessary to get the reader to start inventorying properly
+                              # Don't know why just yet.
             return True
         
         print("Reader connection timed out")
@@ -143,6 +145,7 @@ class RFIDReader:
         try: 
             self.reader.disconnect(timeout=None)
             self.reader.join(0.1)
+            time.sleep(0.5) # This is also necessary to get the reader to disconnect properly
             return True
         except Exception as e:
             print("Disconnection failed: " + str(e))

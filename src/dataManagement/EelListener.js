@@ -99,10 +99,16 @@ const EelListener = (props) => {
         // forceState({ isConnected, isInventorying });
     }
 
+    function closeGUI() {
+        window.onbeforeunload = null;
+        window.close();
+    }
+
     useEffect(() => {
         window.eel.expose(acceptTag, 'acceptTag');
         window.eel.expose(createAlert, 'createAlert');
         window.eel.expose(readerLog, 'readerLog');
+        window.eel.expose(closeGUI, 'closeGUI');
     }, []);
 
     return (

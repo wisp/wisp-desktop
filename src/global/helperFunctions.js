@@ -67,7 +67,6 @@ export function getFormattedData(type, data) {
 
 export function getRecentDataFromArray(array) {
     // Remove duplicate entries based on wispId and add count for each duplicate
-    const recentData = [];
     const recentDataMap = {};
     for (let i = 0; i < array.length; i++) {
         const tag = array[i];
@@ -75,10 +74,9 @@ export function getRecentDataFromArray(array) {
             recentDataMap[tag['wispId']].count++;
         } else {
             recentDataMap[tag['wispId']] = { ...tag, count: 1 };
-            recentData.push(recentDataMap[tag['wispId']]);
         }
     }
-    return recentData;
+    return recentDataMap;
 }
 
 export function getVariableListFromRecentTags(recentTags) {

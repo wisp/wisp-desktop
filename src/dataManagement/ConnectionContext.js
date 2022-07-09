@@ -71,9 +71,7 @@ const ConnectionContext = (props) => {
             } else {
                 alert.error("Check the hostname and port", { title: "Unable to connect", icon: 'cable' });
             }
-            setTimeout(() => {
-                unlock();
-            }, 1500);
+            unlock();
         }).catch(err => {
             unlock();
             alert.error(err.message, { title: "Unable to connect", icon: 'cable' });
@@ -87,9 +85,7 @@ const ConnectionContext = (props) => {
         if (success) {
             alert.info("Disconnected from the reader", { title: "Disconnected", icon: 'cable' });
             updateStatus({ isConnected: false, isInventorying: false })
-            setTimeout(() => {
-                unlock();
-            }, 500);
+            unlock();
         } else {
             unlock();
             alert.error("Something went wrong", { title: "Unable to disconnect", icon: 'cable' });
