@@ -20,17 +20,20 @@ const Network = (props) => {
     const context = useContext(Connection);
     const functions = context.connectionFunctions;
     const connectionStatus = context.connectionStatus;
-    const [showConsole, setShowConsole] = useState(false);
 
-    const [network, setNetwork] = useState({
-        host: "",
-        port: 5084,
-    });
+    const [params, setParams] = context.settings
 
-    const updateNetwork = (e) => {
-        setNetwork({
-            ...network,
+    const updateParams = (e) => {
+        setParams({
+            ...params,
             [e.target.name]: e.target.value
+        });
+    }
+
+    const updateConsole = () => {
+        setParams({
+            ...params,
+            showConsole: !params.showConsole
         });
     }
 
@@ -39,7 +42,7 @@ const Network = (props) => {
             await functions.disconnect()
         }
         else {
-            await functions.connect(network.host, network.port)
+            await functions.connect(params.host, params.port)
         }
     }
 
@@ -55,8 +58,8 @@ const Network = (props) => {
                         variant="filled"
                         name="host"
                         sx={{ mr: 1, width: '73%' }}
-                        value={network.host}
-                        onChange={updateNetwork}
+                        value={params.host}
+                        onChange={updateParams}
                     />
                     <TextField
                         disabled={connectionStatus.isConnected || connectionStatus.isWaiting}
@@ -64,18 +67,19 @@ const Network = (props) => {
                         label="Port"
                         variant="filled"
                         sx={{ width: '24%' }}
-                        value={network.port}
-                        onChange={updateNetwork}
+                        value={params.port}
+                        onChange={updateParams}
                     />
                 </div>
             </FormGroup>
-            {showConsole && <ReaderConsole />}
+            {params.showConsole && <ReaderConsole />}
             <FormGroup sx={{ mt: 1 }}>
                 <div className='form-group right top-space'>
-                    <Tooltip title={(showConsole ? "Hide" : "Show") + " reader console"} placement='left'>
+                    <Tooltip title={(params.showConsole ? "Hide" : "Show") + " reader console"} placement='left'>
                         <ToggleButton
-                            selected={showConsole}
-                            onClick={() => setShowConsole(!showConsole)}
+                            selected={params.showConsole}
+                            name="showConsole"
+                            onClick={updateConsole}
                             sx={{ borderRadius: '100px', width: '36.5px' }}
                             size="small"
                             variant="contained"

@@ -36,11 +36,7 @@ const Inventory = (props) => {
     const connectionStatus = context.connectionStatus;
     const [showConsole, setShowConsole] = useState(false);
 
-    const [params, setParams] = useState({
-        antennas: [1],
-        power: 60,
-        mode: 0,
-    });
+    const [params, setParams] = context.settings
 
     const updateParams = (e) => {
         setParams({

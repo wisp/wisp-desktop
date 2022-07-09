@@ -46,6 +46,15 @@ const ConnectionContext = (props) => {
         blacklist: [],
     });
 
+    const [params, setParams] = useState({
+        host: '',
+        port: 5084,
+        showConsole: false,
+        power: 60,
+        antennas: [1],
+        mode: 0,
+    });
+
     const lock = () => {
         updateStatus({ isWaiting: true })
     }
@@ -163,7 +172,7 @@ const ConnectionContext = (props) => {
     }
 
     return (
-        <Connection.Provider value={{ connectionFunctions, connectionStatus: _connectionStatus, filter: [filters, setFilters] }}>
+        <Connection.Provider value={{ connectionFunctions, connectionStatus: _connectionStatus, filter: [filters, setFilters], settings: [params, setParams] }}>
             {props.children}
         </Connection.Provider>
     );
