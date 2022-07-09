@@ -299,6 +299,10 @@ def onGUIClose(a,b):
     rfid.kill_all()
     sys.exit()
 
-
+# Production
 eel.init('build')
 eel.start("index.html", host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+
+# Development
+# eel.init('public')
+# eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])

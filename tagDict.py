@@ -46,17 +46,17 @@ def accelParser(d):
 
     return {
         'x': {
-            'value': (scaleAndFlip(d[4:8]) * 0.87)*2,
+            'value': scaleAndFlip(d[4:8]) * 0.87,
             'unit': 'unitless',
             'label': 'X Acceleration'
         },
         'y': {
-            'value': (scaleAndFlip(d[0:4]) * 0.886)*2,
+            'value': scaleAndFlip(d[0:4]) * 0.886,
             'unit': 'unitless',
             'label': 'Y Acceleration'
         },
         'z': {
-            'value': (-(scaleAndFlip(d[8:12]) - 100) * 1.034)*2,
+            'value': -(scaleAndFlip(d[8:12]) - 100) * 1.034,
             'unit': 'unitless',
             'label': 'Z Acceleration'
         }
