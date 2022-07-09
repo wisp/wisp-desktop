@@ -1,5 +1,3 @@
-from cProfile import label
-import random
 import time
 import math
 
