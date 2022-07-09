@@ -34,7 +34,6 @@ const Inventory = (props) => {
     const context = useContext(Connection);
     const functions = context.connectionFunctions;
     const connectionStatus = context.connectionStatus;
-    const [showConsole, setShowConsole] = useState(false);
 
     const [params, setParams] = context.settings
 

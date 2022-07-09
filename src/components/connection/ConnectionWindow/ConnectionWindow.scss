@@ -1,12 +1,15 @@
 @import '/src/global/Global.scss';
 
 .connection-window.window {
-    width: 350px;
+    $width: 350px;
+    $statusBarThickness: 5px;
+
+    width: $width;
     border-radius: 0;
     height: 100vh;
     transition: width 0.2s ease-in-out, border-color 0.3s ease-in-out;
 
-    border-right: 5px solid $gray5;
+    border-right: $statusBarThickness solid $gray5;
 
     &.yellow { border-color: $yellow4; }
     &.red { border-color: $red2;  }
@@ -15,7 +18,7 @@
 
     &>.window-content {
         box-sizing: border-box;
-        width: 347px;
+        width: $width - $statusBarThickness;
     }
 
     &.collapsed {
