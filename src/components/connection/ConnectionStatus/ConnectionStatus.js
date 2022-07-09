@@ -43,7 +43,7 @@ const ConnectionStatus = (props) => {
             <div className="status-group">
                 <div className="status">
                     <div className="label">Status</div>
-                    <div className="value">{connectionStatus.isInventorying ? "Inventory" : connectionStatus.isConnected ? "Idle" : "Disconnected"}</div>
+                    <div className="value">{connectionStatus.isWaiting ? "Waiting" : connectionStatus.isInventorying ? 'Inventory' : connectionStatus.isConnected ? "Connected" : "Disconnected"}</div>
                 </div>
                 <div className="status">
                     <div className="label">Last started</div>

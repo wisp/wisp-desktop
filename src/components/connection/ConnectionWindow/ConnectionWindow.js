@@ -17,7 +17,7 @@ const ConnectionWindow = (props) => {
     const [collapsedWindow, setCollapsed] = useState(false);
     const connectionStatus = useContext(Connection).connectionStatus;
 
-    const barColor = connectionStatus.isInventorying ? 'green' : connectionStatus.isConnected ? "yellow" : "red";
+    const barColor = connectionStatus.isWaiting ? "yellow" : connectionStatus.isInventorying ? 'blue' : connectionStatus.isConnected ? "green" : "red";
 
     if (collapsedWindow) {
         return (
@@ -30,7 +30,7 @@ const ConnectionWindow = (props) => {
                             Connection
                         </div>
                         <div className='bottom'>
-                            {connectionStatus.isInventorying ? 'Inventory' : connectionStatus.isConnected ? "Idle" : "Disconnected"}
+                            {connectionStatus.isWaiting ? "Waiting" : connectionStatus.isInventorying ? 'Inventory' : connectionStatus.isConnected ? "Connected" : "Disconnected"}
                         </div>
                     </div>
                 </div>

@@ -4,18 +4,14 @@
     width: 350px;
     border-radius: 0;
     height: 100vh;
-    box-shadow: none;
-    transition: width 0.2s ease-in-out;
+    transition: width 0.2s ease-in-out, border-color 0.3s ease-in-out;
 
-    border-right: 5px solid $green2;
+    border-right: 5px solid $gray5;
 
-    &.yellow {
-        border-color: $yellow4;
-    }
-
-    &.red {
-        border-color: $red2;
-    }
+    &.yellow { border-color: $yellow4; }
+    &.red { border-color: $red2;  }
+    &.blue { border-color: $primary; }
+    &.green { border-color: $green2; }
 
     &>.window-content {
         box-sizing: border-box;
