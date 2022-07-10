@@ -75,6 +75,10 @@ class RFIDReader:
         self.resetReaderConfig()
 
     def forceFrontendUpdate(self):
+        # TODO: Not implemented yet
+        # An unexpected disconnection will cause the frontend to lose
+        # step with the backend and reader, requiring an app restart.
+
         # eel.forceStateUpdate(self.isConnected, self.isInventoryRunning)
         return True
     
@@ -86,7 +90,7 @@ class RFIDReader:
         self.isConnected = True
         self.forceFrontendUpdate()
 
-    def onDisconnect(self, reader, state):
+    def onDisconnect(self, state):
         print("Received disconnect event from reader")
         self.isConnected = False
         self.isInventoryRunning = False
@@ -255,7 +259,7 @@ class RFIDReader:
         except Exception as e:
             print("Failed to parse tag: " + str(e))
             return False
-    
+
 
 rfid = RFIDReader()
 
@@ -299,10 +303,15 @@ def onGUIClose(a,b):
     rfid.kill_all()
     sys.exit()
 
-# Production
-eel.init('build')
-eel.start("index.html", host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
-
-# Development
-# eel.init('public')
-# eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+if __name__ == "__main__":
+    if (len(sys.argv) > 1 and sys.argv[1] == "--dev"):
+        # Development
+        print("Running in development mode:")
+        print("Expects the development version of react to be running on port 3000")
+        print("It can be started with `npm start`")
+        eel.init('public')
+        eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+    else:
+        # Production
+        eel.init('build')
+        eel.start("index.html", host="localhost", port=8888, size=(1200, 800), close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
