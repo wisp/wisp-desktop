@@ -5,7 +5,6 @@ A GUI desktop interface for WISP tags, using [sllurp2](https://github.com/fviard
 Pre-built releases of the app are available in `releases/`.
 
 ## Building the app using the script
-### Using the Python script
 1. Clone [sllurp2](https://github.com/fviard/sllurp/tree/fviard-develop-v2/sllurp) and install it
 2. Install other Python dependencies with `pip install eel pyinstaller`
 3. Clone this repo
