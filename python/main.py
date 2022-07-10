@@ -287,7 +287,6 @@ def stopInventory():
 @eel.expose
 def changeFilters(whitelist, blacklist):
     print("Eel updating filters")
-    print(str(whitelist))
     rfid.changeFilters(whitelist, blacklist)
     return True
 
@@ -313,5 +312,6 @@ if __name__ == "__main__":
         eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
     else:
         # Production
-        eel.init('../react/build')
-        eel.start("index.html", host="localhost", port=8888, size=(1200, 800), close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+        print("Running in production mode:")
+        eel.init('web')
+        eel.start("index.html", host="localhost", port=3467, size=(1200, 800), close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])

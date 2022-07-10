@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "baseUrl": "react/src"
+        "baseUrl": "src"
     },
-    "include": ["react/src"]
+    "include": ["src"]
 }
