@@ -8,11 +8,11 @@ Pre-built releases of the app are available in `releases/`.
 ### Using the python script
 1. Clone this repo
 2. Install Python dependencies:
-  1. cd into `python/`
-  2. `pip install eel pyinstaller`
-  3. Install sllurp2 from source with `pip install ./sllurp`
+   1. cd into `python/`
+   2. `pip install eel pyinstaller`
+   3. Install sllurp2 from source with `pip install ./sllurp`
 3. Install react and dependencies:
-  1. cd into `react/`
-  2. `npm install`
+   1. cd into `react/`
+   2. `npm install`
 4. From the root directory, run `python build_app.py`  
 From now on, just run the script after making changes.
