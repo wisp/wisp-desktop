@@ -16,8 +16,8 @@ const widgets = {
         component: <RecentTags/>,
         icon: "table_chart",
         maxSize: [null, null],
-        minSize: [10, 2],
-        defaultSize: [13, 4]
+        minSize: [7, 2],
+        defaultSize: [11, 4]
     },
     ImuDemo: {
         title: "IMU Visualization",
