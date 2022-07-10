@@ -1,15 +1,15 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+react/node_modules
+react/.pnp
 .pnp.js
 
 # testing
-/coverage
+react/coverage
 
 # production
-/build
+react/build
 /dist
 
 # misc
@@ -24,5 +24,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # python
-/venv
-/__pycache__
+python/venv
+__pycache__
+.eggs

@@ -313,5 +313,5 @@ if __name__ == "__main__":
         eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
     else:
         # Production
-        eel.init('build')
+        eel.init('../react/build')
         eel.start("index.html", host="localhost", port=8888, size=(1200, 800), close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
