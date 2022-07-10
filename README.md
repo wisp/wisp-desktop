@@ -5,14 +5,10 @@ A GUI desktop interface for WISP tags, using [sllurp2](https://github.com/fviard
 Pre-built releases of the app are available in `releases/`.
 
 ## Building the app using the script
-### Using the python script
+### Using the Python script
 1. Clone this repo
-2. Install Python dependencies:
-   1. cd into `python/`
-   2. `pip install eel pyinstaller`
-   3. Install sllurp2 from source with `pip install ./sllurp`
-3. Install react and dependencies:
-   1. cd into `react/`
-   2. `npm install`
-4. From the root directory, run `python build_app.py`  
+2. Clone [sllurp2](https://github.com/fviard/sllurp/tree/fviard-develop-v2/sllurp) and install it
+3. Install other Python dependencies with `pip install eel pyinstaller`
+4. Install js dependencies by running `npm install` from the react folder
+5. Run `python build_app.py`  
 From now on, just run the script after making changes.
