@@ -5,29 +5,26 @@ import { Connection } from 'dataManagement/ConnectionContext';
 import Icon from 'components/Icon/Icon';
 
 const TemplateWidget = (props) => {
-    // TagData contains every tag that's been seen by the
-    // reader, with the most recent tag at the end of the
-    // array.
+    // TagData contains an array of every tag that's been
+    // seen by the reader, with the most recent tag at the
+    // end of the array.
     const tagData = useContext(TagData).data;
 
-    // TagDataRecent contains the most recent tag that's
-    // been seen by the reader for each WISP ID. If
-    // another tag is seen with the same WISP ID, it
-    // replaces the entry rather than adding a new one.
+    // TagDataRecent contains a dictionary of tags read by
+    // the reader, with the keys being each tag's WISP ID.
     const tagDataRecent = useContext(TagDataRecent).data;
 
     // Connection keeps the connection status, settings
-    // and filters. The second element in the array can
-    // be used to modify settings or filters.
-    const [connection, ] = useContext(Connection);
+    // and filters.
+    const connectionStatus = useContext(Connection).connectionStatus;
 
     return (
         <Window title="Template Widget" right={<Icon small name="close" click={props.onClose} />}>
             Total tags read by the reader: {tagData.length}
             <br/><br/>
-            Unique tags read: {tagDataRecent.length}
+            Unique tags read: {Object.keys(tagDataRecent).length}
             <br/><br/>
-            Connection status: {connection.status.connected ? "Connected" : "Disconnected"}
+            Connection status: {connectionStatus.isConnected ? "Connected" : "Disconnected"}
         </Window>
     );
 }

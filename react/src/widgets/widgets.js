@@ -43,14 +43,14 @@ const widgets = {
     //     minSize: [7, 2],
     //     defaultSize: [10, 4]
     // },
-    // TemplateWidget: {
-    //     "title": "Template Widget",
-    //     "component": <TemplateWidget/>,
-    //     "icon": "copy_all",
-    //     "maxSize": [null, null],
-    //     "minSize": [3, 3],
-    //     "defaultSize": [3, 3]
-    // }
+    TemplateWidget: {
+        "title": "Template Widget",
+        "component": <TemplateWidget/>,
+        "icon": "copy_all",
+        "maxSize": [null, null],
+        "minSize": [3, 3],
+        "defaultSize": [3, 3]
+    }
 }
 
 export default widgets;

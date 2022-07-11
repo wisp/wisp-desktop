@@ -25,7 +25,6 @@ try:
     # Build the react UI to its build folder
     print(">> Building the react app")
     os.chdir("react")
-    runCommand("npm install")
     runCommand("npm run build")
     os.chdir("..")
 
