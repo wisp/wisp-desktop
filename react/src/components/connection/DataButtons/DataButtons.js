@@ -87,7 +87,7 @@ const DataButtons = (props) => {
             <Modal show={clearModal} title="Clear Session Data" close={() => setClearModal(false)}>
                 <p>Are you sure you want to delete all collected tag data?</p>
                 <div class="spacer-15"/>
-                <p>You have <strong>{tagData.length} total tag reads</strong> in this session, with <strong>{tagDataRecent.length} unique WISP IDs</strong>.</p>
+                <p>You have <strong>{tagData.length} total tag reads</strong> in this session, with <strong>{Object.keys(tagDataRecent).length} unique WISP IDs</strong>.</p>
                 <div className="spacer-2" />
                 <div className="form-group right">
                     <Button

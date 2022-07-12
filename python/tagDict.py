@@ -3,7 +3,7 @@ import math
 
 defs = {
     '0C': {
-        'name': 'Acknowledgement',
+        'name': 'Acknowledgment',
         'parser': lambda d : ackParser(d),
         'parserString': lambda d : ackParserString(d),
     },
