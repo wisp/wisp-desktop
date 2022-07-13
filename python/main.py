@@ -5,6 +5,8 @@ import time
 import atexit
 import tagDict
 import sys
+from queue import Queue
+from threading import Thread
 
 class SllurpHandler(logging.StreamHandler):
     def __init__(self):
@@ -73,6 +75,12 @@ class RFIDReader:
 
         self.fac_args = dict()
         self.resetReaderConfig()
+        
+        self.isKilled = False
+        self.tagQueue = Queue(maxsize=1000)
+        self.tagThread = Thread(target=self.process_tags, args=(self.tagQueue, self.isKilled,))
+        self.tagThread.start()
+
 
     def forceFrontendUpdate(self):
         # TODO: Not implemented yet
@@ -221,13 +229,22 @@ class RFIDReader:
         return True
 
     def kill_all(self):
+        self.isKilled = True
+        self.tagThread.join()
         self.stopInventory()
         time.sleep(0.1)
         self.disconnect()
 
     def tag_seen(self, reader, tags):
-        try:
-            for tag in tags:
+        self.tagQueue.put(*tags)
+
+    def process_tags(self, queue, isKilled):
+        while(not isKilled):
+            if queue.full():
+                print("The tag processing queue is full")
+
+            try:
+                tag = queue.get()
                 newTag = {}
                 epc = str(tag['EPC-96'], 'utf-8').upper()
                 newTag['wispId'] = epc[20:24]
@@ -240,7 +257,6 @@ class RFIDReader:
                     newTag['wispData'] = epc[2:20]
                     # newTag['wispHwRev'] = epc[18:20]
                     newTag['rssi'] = tag['PeakRSSI']
-
                     # Here we create formatted versions of the data. A
                     # string version that can be rendered as text and an
                     # object version that has the data, units and a label.
@@ -254,11 +270,12 @@ class RFIDReader:
 
                     eel.acceptTag(newTag)
                     # self.count += 1
-                
+                    
 
-        except Exception as e:
-            print("Failed to parse tag: " + str(e))
-            return False
+            except Exception as e:
+                print("Failed to parse tag: " + str(e))
+                return False
+        return
 
 
 rfid = RFIDReader()
@@ -308,7 +325,7 @@ if __name__ == "__main__":
         print("Running in development mode:")
         print("Expects the development version of react to be running on port 3000")
         print("It can be started with `npm start`")
-        eel.init('public')
+        eel.init('../react/public')
         eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
     else:
         # Production
