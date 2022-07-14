@@ -233,7 +233,8 @@ class RFIDReader:
         self.disconnect()
 
     def tag_seen(self, reader, tags):
-        map(self.tagQueue.put, tags)
+        for tag in tags:
+            self.tagQueue.put(tag)
 
     def process_tags(self, queue, isKilled):
         while(not isKilled):
