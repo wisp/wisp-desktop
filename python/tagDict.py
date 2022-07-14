@@ -5,12 +5,17 @@ defs = {
     '0C': {
         'name': 'Acknowledgment',
         'parser': lambda d : ackParser(d),
-        'parserString': lambda d : ackParserString(d),
+        'parserString': lambda d : ackParserString(d)
     },
     '0B': {
         'name': 'Accelerometer',
         'parser': lambda d : accelParser(d),
-        'parserString': lambda d : accelParserString(d),
+        'parserString': lambda d : accelParserString(d)
+    },
+    'CA': {
+        'name': 'Camera',
+        'parser': lambda d : cameraParser(d),
+        'parserString': lambda d : cameraParserString(d)
     }
 }
 
@@ -67,3 +72,26 @@ def accelParser(d):
 def accelParserString(d):
     parsed = accelParser(d)
     return '{:10.4f}, {:10.4f}, {:10.4f}'.format(parsed['x']['value'], parsed['y']['value'], parsed['z']['value'])
+
+
+def cameraParser(d):
+    return {
+        'seq_count': {
+            'value': int(d[0:2], 16),
+            'unit': 'unitless',
+            'label': 'Sequence Count'
+        },
+        'adc': {
+            'value': int(d[2:6], 16) * .0041544477, # Based on 4.25 V max ADC range
+            'unit': 'V',
+            'label': 'ADC'
+        },
+        # 'pixels': {
+        #     for 
+        # }
+    }
+
+def cameraParserString(d):
+    parsed = cameraParser(d)
+    # Format ADC: ##.## V, Seq: ###
+    return 'ADC: {:10.2f} V, Seq: {}'.format(parsed['adc']['value'], parsed['seq_count']['value'])
