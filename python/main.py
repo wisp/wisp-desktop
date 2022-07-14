@@ -13,23 +13,19 @@ class SllurpHandler(logging.StreamHandler):
         logging.StreamHandler.__init__(self)
 
     def emit(self, record, level=None):
-        # level = record.levelno
-        
-        # if level == logging.INFO:
-        #     sev = "info"
-        # elif level == logging.WARNING:
-        #     sev = "error"
-        # else:
-        #     sev = "error"
-
-        # msg = record.getMessage()
-        # title = sev
-        # if len(record.getMessage().split(": ")) > 1:
-        #     title = record.getMessage().split(": ")[0]
-        #     msg = record.getMessage().split(": ")[1]
-
+        # Send all reader logs to the built-in terminal
         eel.readerLog(record.getMessage())
-        # print(record.getMessage())
+
+        # If it's a warning or error, send it as an alert
+        if record.levelno > logging.INFO:
+            if record.levelno == logging.WARNING:
+                sev = "Warning"
+            else:
+                sev = "Error"
+
+            msg = record.getMessage()
+            title = sev + " from reader"
+            eel.createAlert('error', title, msg, sev.lower())
 
 
 sllurp_logger = logging.getLogger('sllurp')
@@ -44,10 +40,11 @@ class RFIDReader:
         self.reader = None
         self.whitelist = []
         self.blacklist = []
-
+        
         self.FAC_ARGS_DEFAULT = dict(
             report_every_n_tags=1,
             start_inventory=False,
+            impinj_search_mode=2,
             tag_content_selector={
                 "EnableROSpecID": False,
                 "EnableSpecIndex": False,
@@ -236,7 +233,7 @@ class RFIDReader:
         self.disconnect()
 
     def tag_seen(self, reader, tags):
-        self.tagQueue.put(*tags)
+        map(self.tagQueue.put, tags)
 
     def process_tags(self, queue, isKilled):
         while(not isKilled):
