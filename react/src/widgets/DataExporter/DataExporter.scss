@@ -1,0 +1,14 @@
+@import '/src/global/Global.scss';
+
+.stop-inventory {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    background-color: $gray8;
+    border-radius: $smallRadius;
+
+    p {
+        width: 100%;
+        text-align: center;
+    }
+}

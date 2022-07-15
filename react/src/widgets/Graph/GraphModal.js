@@ -56,7 +56,7 @@ const GraphModal = (props) => {
                         <MenuItem value={'cos'}>Cosine</MenuItem> */}
                         {props.varList &&
                             props.varList.map((variable) => {
-                                return <MenuItem value={variable}>{variable}</MenuItem>
+                                return <MenuItem value={variable.value}>{variable.label} ({variable.unit})</MenuItem>
                             })
                         }
                     </Select>
@@ -92,7 +92,7 @@ const GraphModal = (props) => {
                     >
                         {props.varList &&
                             props.varList.map((variable) => {
-                                return <MenuItem value={variable.var}>{variable.label} ({variable.unit})</MenuItem>
+                                return <MenuItem value={variable.value}>{variable.label} ({variable.unit})</MenuItem>
                             })
                         }
                     </Select>

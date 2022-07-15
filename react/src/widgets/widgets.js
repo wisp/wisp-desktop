@@ -7,6 +7,7 @@ import ImuDemo from './ImuDemo/ImuDemo';
 import Graph from './Graph/Graph';
 import RecentTags from './RecentTags/RecentTags';
 import TemplateWidget from './_TemplateWidget/TemplateWidget';
+import DataExporter from './DataExporter/DataExporter';
 
 // 3. Add it to the widgets object with it's properties
 //    (icon names are from https://fonts.google.com/icons)
@@ -35,14 +36,6 @@ const widgets = {
         minSize: [7, 5],
         defaultSize: [11, 7]
     },
-    // RecentTagsNew: {
-    //     title: "New Recent Tags",
-    //     component: <RecentTagsNew/>,
-    //     icon: "cake",
-    //     maxSize: [null, null],
-    //     minSize: [7, 2],
-    //     defaultSize: [10, 4]
-    // },
     TemplateWidget: {
         "title": "Template Widget",
         "component": <TemplateWidget/>,
@@ -50,6 +43,14 @@ const widgets = {
         "maxSize": [null, null],
         "minSize": [3, 3],
         "defaultSize": [3, 3]
+    },
+    DataExporter: {
+        "title": "Data Exporter",
+        "component": <DataExporter/>,
+        "icon": "ios_share",
+        "maxSize": [4, null],
+        "minSize": [4, 3],
+        "defaultSize": [4, 3]
     }
 }
 
