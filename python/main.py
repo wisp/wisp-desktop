@@ -192,6 +192,10 @@ class RFIDReader:
             print("Reader not connected")
         return False
 
+    def startAccess(self):
+        print("Running reader.startAccess")
+        self.reader.llrp.startAccess()
+
     def stopInventory(self):
         if self.isConnected:
             if self.isInventoryRunning:
@@ -272,7 +276,7 @@ class RFIDReader:
 
             except Exception as e:
                 print("Failed to parse tag: " + str(e))
-                return False
+                pass
         return
 
 
