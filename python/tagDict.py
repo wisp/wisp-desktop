@@ -38,31 +38,30 @@ def ackParserString(d):
     return parsed['sin']['value']
 
 def accelParser(d):
-    def scaleAndFlip(raw):
+    def scale(raw):
         value = int(raw, 16)
-
-        if (value < 0 or value > 1024):
-            value = 0
-
         value = 100.0 * value / 1024.0
-        value = 100.0 - value
         return value
+
+    x = 1.13 * scale(d[4:8])  - 52.77
+    y = 1.15 * scale(d[0:4])  - 56.67
+    z = 1.10 * scale(d[8:12]) - 56.17
 
 
     return {
         'x': {
-            'value': scaleAndFlip(d[4:8]) * 0.87,
-            'unit': 'unitless',
+            'value': x,
+            'unit': 'm/s^2',
             'label': 'X Acceleration'
         },
         'y': {
-            'value': scaleAndFlip(d[0:4]) * 0.886,
-            'unit': 'unitless',
+            'value': y,
+            'unit': 'm/s^2',
             'label': 'Y Acceleration'
         },
         'z': {
-            'value': -(scaleAndFlip(d[8:12]) - 100) * 1.034,
-            'unit': 'unitless',
+            'value': z,
+            'unit': 'm/s^2',
             'label': 'Z Acceleration'
         }
     }

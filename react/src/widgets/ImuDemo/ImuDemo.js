@@ -43,19 +43,18 @@ const ImuDemoInner = (props) => {
 
     useEffect(() => {
         if (accelTag) {
-            const x = (accelTag.formatted.x.value - 50);
-            const y = (accelTag.formatted.y.value - 50);
-            const z = (accelTag.formatted.z.value - 50);
-            // const x = 50;
-            // const y = 50;
-            // const z = 50;
+            const x = accelTag.formatted.x.value;
+            const y = accelTag.formatted.y.value;
+            const z = accelTag.formatted.z.value;
+            
+            const sign = (z > 0 ? 1 : -1);
+            const miu = 1;
+            const roll = Math.atan2(y, sign * Math.sqrt(z*z + miu*x*x)) * 180 / Math.PI;
+            const yaw = Math.atan2(-x, Math.sqrt(y*y + z*z)) * 180 / Math.PI;
 
-            const pitch = -180 * Math.atan(x / Math.sqrt(y * y + z * z)) / Math.PI;
-            const roll = 180 * Math.atan(y / Math.sqrt(x * x + z * z)) / Math.PI;
-            const yaw = 180 * Math.atan(z / Math.sqrt(x * x + z * z)) / Math.PI;
+            const pitch = 0;
 
-
-            setAngle([roll, yaw, pitch]);
+            setAngle([-roll, -yaw, -pitch]);
         }
     }, [accelTag]);
 
