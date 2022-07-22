@@ -7,17 +7,17 @@ wispType ─┬┐  ┌─── wispData ───┐ ┌──┬─ wispId
           0B  01CE02000260000141 0042
 ```
 
-In order to process `wispData`, the app looks for a definition in `tagDict.py` with a matching `wispType`. If one is found, the defined `parser` and `parserString` are used to add formatted versions of the data to the tag report.
+In order to process the tag, the app looks for a definition in `tagDict.py` with a matching `wispType`. If one is found, the defined `parser` and `parserString` are used to add formatted versions of the data to the tag report.
 
 ## Adding a new tag definition
-Add an entry to the `dict` object in `tagDict.py`. The key is the wispType being added. `name` should be a string. `parser` and `parserString` should be defined as lambda functions that accept the 18 character `wispData`.
+Add an entry to the `dict` object in `tagDict.py`. The key is the wispType being added. `name` should be a string. `parser` and `parserString` should be defined as lambda functions that accepts the full 24 character EPC (most of the time `WispData` is all you'll need to access).
 
 ```python
 defs = {
 	'0B': {
         'name': 'Accelerometer',
-        'parser': lambda d : accelParser(d),
-        'parserString': lambda d : accelParserString(d),
+        'parser': lambda epc : accelParser(epc),
+        'parserString': lambda epc : accelParserString(epc),
     }
 	...
 }
@@ -25,7 +25,7 @@ defs = {
 
 `parserString` should return a readable string representation of the data. Parser should return an object with any number of entries, each with `value`, `unit` and `label` fields.
 ```python
-def someParser(d):
+def someParser(epc):
 	# Process data here
     return {
         'data1': {
