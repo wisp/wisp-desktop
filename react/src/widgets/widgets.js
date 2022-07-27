@@ -8,6 +8,7 @@ import Graph from './Graph/Graph';
 import RecentTags from './RecentTags/RecentTags';
 import TemplateWidget from './_TemplateWidget/TemplateWidget';
 import DataExporter from './DataExporter/DataExporter';
+import ImgCapture from './ImgCapture/ImgCapture';
 
 // 3. Add it to the widgets object with it's properties
 //    (icon names are from https://fonts.google.com/icons)
@@ -51,7 +52,16 @@ const widgets = {
         "maxSize": [4, null],
         "minSize": [4, 3],
         "defaultSize": [4, 3]
-    }
+    },
+    ImgCapture: {
+        "title": "Image Capture",
+        "component": <ImgCapture/>,
+        "icon": "photo_library",
+        "maxSize": [null, null],
+        "minSize": [4, 3],
+        "defaultSize": [5, 4]
+    },
+
 }
 
 export default widgets;

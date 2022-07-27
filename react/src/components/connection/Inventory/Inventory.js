@@ -23,6 +23,7 @@ const modes = {
     2: { name: "2: Dense Reader", description: "M: 4, Tari: 25.0ms" },
     3: { name: "3: Dense Reader", description: "M: 8, Tari: 25.0ms" },
     4: { name: "4: Max Miller", description: "M: 4, Tari: 7.14ms" },
+    10: { name: "WISPCam Mode", description: "Reduces missed pixels, filters all other tags" },
     // 1000: { name: "1000 Reader Autoset", description: "Parameters set by reader" },
     // 1001: { name: "1001 Reader Autoset Static", description: "Parameters set by reader" },
 }

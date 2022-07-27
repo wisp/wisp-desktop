@@ -16,7 +16,7 @@ const networkSchema = yup.object({
 const settingsSchema = yup.object({
     power: yup.number('TX power must be a number').min(0, 'TX power must be between 0-60').max(60, 'Tari must be between 0-60'),
     antennas: yup.array().of(yup.number('Antenna must be a number').min(1, 'Antenna must be between 1-8').max(8, 'Antenna must be between 1-8')),
-    mode: yup.number('Mode must be a number').min(0, 'Mode must be between 0-4').max(4, 'Mode must be between 0-4'),
+    mode: yup.number('Mode must be a number').oneOf([0, 1, 2, 3, 4, 10], 'Mode must be between 0-4'),
 })
 
 const filterSchema = yup.object({
@@ -26,7 +26,6 @@ const filterSchema = yup.object({
 
 const ConnectionContext = (props) => {
     const alert = useAlert();
-    console.log("rendering Connection Context")
 
     const [_connectionStatus, _setConnectionStatus] = useState({
         isConnected: false,
@@ -104,6 +103,11 @@ const ConnectionContext = (props) => {
     const startInventory = async (antennas, power, mode) => {
         lock();
         settingsSchema.validate({ antennas, power, mode }).then(async () => {
+            
+            if (mode == 10) {
+                setFilters({ whitelist: ['CA00'], blacklist: [] });
+            }
+
             const success = await window.eel.startInventory(antennas, parseInt(power), parseInt(mode))()
             if (success) {
                 alert.success("Accepting tags from the reader", { title: "Inventory Started", icon: 'leak_add' });
@@ -113,6 +117,9 @@ const ConnectionContext = (props) => {
                 unlock();
                 alert.error("Check your parameters and try again", { title: "Unable to start inventory", icon: 'leak_add' });
             }
+        }).catch(err => {
+            unlock();
+            alert.error(err.message, { title: "Unable to start inventory", icon: 'leak_add' });
         })
     }
 

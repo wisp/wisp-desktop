@@ -55,19 +55,36 @@ const EelListener = (props) => {
     function readerLog(message) {
         setReaderLogs([...readerLogsRef.current, message]);
     }
+
+    function locationOf(element, array, comparer, start, end) {
+        if (array.length === 0)
+            return 0;
+    
+        start = start || 0;
+        end = end || array.length;
+        var pivot = (start + end) >> 1;  // should be faster than dividing by 2
+    
+        var c = comparer(element, array[pivot]);
+        if (end - start <= 1) return c == -1 ? pivot : pivot + 1;
+    
+        switch (c) {
+            case -1: return locationOf(element, array, comparer, start, pivot);
+            case 0: return pivot;
+            case 1: return locationOf(element, array, comparer, pivot, end);
+        };
+    };
+    
+    // sample for objects like {lastName: 'Miller', ...}
+    var timestampCompare = function (a, b) {
+        if (a.seen < b.seen) return -1;
+        if (a.seen > b.seen) return 1;
+        return 0;
+    };
     
     function addTag(tag) {
         if (!temporarilyPausedRef.current) {
-            setTagData([...tagDataRef.current, tag]);
-
-            // const index = tagDataRecentRef.current.findIndex(t => t['wispId'] == tag['wispId']);
-            // if (index != -1) {
-            //     const prevTag = tagDataRecentRef.current[index];
-            //     tag.count = prevTag.count + 1;
-            //     setTagDataRecent([...tagDataRecentRef.current.slice(0, index), tag, ...tagDataRecentRef.current.slice(index + 1)]);
-            // } else {
-            //     setTagDataRecent([...tagDataRecentRef.current, { ...tag, count: 1 }]);
-            // }
+            const index = locationOf(tag, tagDataRef.current, timestampCompare);
+            setTagData([...tagDataRef.current.slice(0, index), tag, ...tagDataRef.current.slice(index)]);
 
             const prev = tagDataRecentRef.current[tag['wispId']];
             if (prev) {
@@ -78,12 +95,12 @@ const EelListener = (props) => {
             setTagDataRecent({ ...tagDataRecentRef.current, [tag['wispId']]: tag });
 
 
-            // If the tag was read more than 250 ms ago, it means we're running very behind, so we need to pause the inventory
-            const delayTime = new Date().getTime() - tag.seen * 1000;
-            // console.log("running " + delayTime + "ms behind");
-            if (delayTime > 250) {
-                pauseInventory(1000);
-            }
+            // // If the tag was read more than 250 ms ago, it means we're running very behind, so we need to pause the inventory
+            // const delayTime = new Date().getTime() - tag.seen * 1000;
+            // // console.log("running " + delayTime + "ms behind");
+            // if (delayTime > 250) {
+            //     pauseInventory(1000);
+            // }
         }
     }
 

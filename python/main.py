@@ -3,10 +3,12 @@ import eel
 import logging
 import time
 import atexit
-import tagDict
 import sys
 from queue import Queue
 from threading import Thread
+
+import tagDict
+
 
 class SllurpHandler(logging.StreamHandler):
     def __init__(self):
@@ -32,6 +34,7 @@ sllurp_logger = logging.getLogger('sllurp')
 sllurp_logger.setLevel(logging.DEBUG)
 sllurp_logger.addHandler(SllurpHandler())
 
+
 class RFIDReader:
 
     def __init__(self):
@@ -40,7 +43,7 @@ class RFIDReader:
         self.reader = None
         self.whitelist = []
         self.blacklist = []
-        
+
         self.FAC_ARGS_DEFAULT = dict(
             report_every_n_tags=1,
             start_inventory=False,
@@ -70,14 +73,17 @@ class RFIDReader:
             },
         )
 
+        self.timeOffset = None
+        self.cameraMode = False
+
         self.fac_args = dict()
         self.resetReaderConfig()
-        
-        self.isKilled = False
-        self.tagQueue = Queue(maxsize=1000)
-        self.tagThread = Thread(target=self.process_tags, args=(self.tagQueue, self.isKilled,))
-        self.tagThread.start()
 
+        self.isKilled = False
+        self.tagQueue = Queue(maxsize=5000)
+        self.tagThread = Thread(target=self.process_tags,
+                                args=(self.tagQueue, self.isKilled,))
+        self.tagThread.start()
 
     def forceFrontendUpdate(self):
         # TODO: Not implemented yet
@@ -86,10 +92,10 @@ class RFIDReader:
 
         # eel.forceStateUpdate(self.isConnected, self.isInventoryRunning)
         return True
-    
+
     def resetReaderConfig(self):
         self.fac_args = self.FAC_ARGS_DEFAULT.copy()
-        
+
     def onConnect(self, reader, state):
         print("Received connect event from reader")
         self.isConnected = True
@@ -112,19 +118,21 @@ class RFIDReader:
         if exception_event:
             print("Reader exception: " + str(exception_event))
             return
-        
+
     def connect(self, host, port):
         print("Running reader.connect")
         self.resetReaderConfig()
         config = LLRPReaderConfig(self.fac_args)
         self.reader = LLRPReaderClient(host, port, config)
-        
+
         self.reader.add_tag_report_callback(self.tag_seen)
-        self.reader.add_state_callback(LLRPReaderState.STATE_CONNECTED, self.onConnect)
+        self.reader.add_state_callback(
+            LLRPReaderState.STATE_CONNECTED, self.onConnect)
         self.reader.add_disconnected_callback(self.onDisconnect)
-        self.reader.add_state_callback(LLRPReaderState.STATE_INVENTORYING, self.onInventory)
-        
-        try: 
+        self.reader.add_state_callback(
+            LLRPReaderState.STATE_INVENTORYING, self.onInventory)
+
+        try:
             print("Connecting to reader...")
             self.reader.connect()
         except Exception as e:
@@ -138,10 +146,11 @@ class RFIDReader:
 
         if (self.isConnected):
             print("Reader connected")
-            time.sleep(2.25)  # Unfortunately, this is necessary to get the reader to start inventorying properly
-                              # Don't know why just yet.
+            # Unfortunately, this is necessary to get the reader to start inventorying properly
+            time.sleep(2.25)
+            # Don't know why just yet.
             return True
-        
+
         print("Reader connection timed out")
         return False
 
@@ -151,10 +160,11 @@ class RFIDReader:
             print("Reader already disconnected")
             return False
 
-        try: 
+        try:
             self.reader.disconnect(timeout=None)
             self.reader.join(0.1)
-            time.sleep(0.5) # This is also necessary to get the reader to disconnect properly
+            # This is also necessary to get the reader to disconnect properly
+            time.sleep(0.5)
             return True
         except Exception as e:
             print("Disconnection failed: " + str(e))
@@ -165,9 +175,11 @@ class RFIDReader:
         if self.isConnected:
             if not self.isInventoryRunning:
                 try:
-                    self.reader.llrp.update_config(LLRPReaderConfig(self.fac_args))
+                    self.reader.llrp.update_config(
+                        LLRPReaderConfig(self.fac_args))
                     try:
-                        self.reader.llrp.parseCapabilities(self.reader.llrp.capabilities)
+                        self.reader.llrp.parseCapabilities(
+                            self.reader.llrp.capabilities)
                     except:
                         print("Failed to parse capabilities")
                         return False
@@ -180,7 +192,7 @@ class RFIDReader:
                     if (self.isInventoryRunning):
                         print("Inventory started")
                         return True
-                    
+
                     print("Failed to start inventory")
                     return False
                 except Exception as e:
@@ -217,16 +229,19 @@ class RFIDReader:
         self.blacklist = blacklist
         return True
 
-    def changeConfig(self, antennas, tx_power, mode_identifier):
+    def changeConfig(self, antennas, tx_power, mode_identifier, camera_mode=False):
+        if camera_mode:
+            self.fac_args["mode_identifier"] = 0
+            self.fac_args["report_every_n_tags"] = 200
+            self.cameraMode = True
+        else:
+            self.fac_args["mode_identifier"] = mode_identifier
+            self.fac_args["report_every_n_tags"] = 1
+            self.cameraMode = False
+
         self.fac_args["antennas"] = antennas
         self.fac_args["tx_power"] = tx_power
-        self.fac_args["mode_identifier"] = mode_identifier
-        # self.fac_config.update_config(dict(
-        #     antennas=antennas,
-        #     tx_power=tx_power,
-        #     # mode_identifier=mode_identifier,
-        #     **self.FAC_ARGS_DEFAULT
-        # ))
+
         return True
 
     def kill_all(self):
@@ -237,8 +252,9 @@ class RFIDReader:
         self.disconnect()
 
     def tag_seen(self, reader, tags):
-        for tag in tags:
-            self.tagQueue.put(tag)
+        reversed_tags = tags[::-1]
+        for tag in reversed_tags:
+            self.tagQueue.put_nowait(tag)
 
     def process_tags(self, queue, isKilled):
         while(not isKilled):
@@ -248,60 +264,77 @@ class RFIDReader:
             try:
                 tag = queue.get()
                 newTag = {}
-                epc = str(tag['EPC-96'], 'utf-8').upper()
+                epc = str(tag['EPC'], 'utf-8').upper()
                 newTag['wispId'] = epc[20:24]
-                
+                newTag['wispType'] = epc[0:2]
+
+                if (newTag['wispType'] == 'CA'):
+                    newTag['wispId'] = 'CA00'
+
                 if ((not self.whitelist or newTag['wispId'] in self.whitelist) and newTag['wispId'] not in self.blacklist):
+
+                    if self.timeOffset is None:
+                        self.timeOffset = time.time() - tag['LastSeenTimestampUTC'] / 1000000
                     
-                    newTag['seen'] = time.time()
+                    newTag['seen'] = tag['LastSeenTimestampUTC'] / 1000000 + self.timeOffset
+
                     newTag['epc'] = epc
-                    newTag['wispType'] = epc[0:2]
                     newTag['wispData'] = epc[2:20]
                     # newTag['wispHwRev'] = epc[18:20]
                     newTag['rssi'] = tag['PeakRSSI']
+                    
                     # Here we create formatted versions of the data. A
                     # string version that can be rendered as text and an
                     # object version that has the data, units and a label.
 
                     # The formatter depends on the type of tag, so check
                     # tags.py for the different types.
-                    tagTools = tagDict.defs.get(newTag['wispType'])
-                    if tagTools:
-                        newTag['formattedString'] = tagTools.get('parserString')(newTag['wispData'])
-                        newTag['formatted'] = tagTools.get('parser')(newTag['wispData'])
+                    try:
+                        tagTools = tagDict.defs.get(newTag['wispType'])
+                        if tagTools:
+                            newTag['formattedString'] = tagTools.get(
+                                'parserString')(epc)
+                            newTag['formatted'] = tagTools.get('parser')(epc)
+                    except Exception as e:
+                        print("Failed to use formatter:", e)
+                        continue
 
                     eel.acceptTag(newTag)
                     # self.count += 1
-                    
 
             except Exception as e:
-                print("Failed to parse tag: " + str(e))
+                print("Failed to parse tag:", e)
                 pass
         return
 
 
 rfid = RFIDReader()
 
+
 @eel.expose
 def connect(host, port):
     print("Eel connecting")
     return rfid.connect(host, port)
+
 
 @eel.expose
 def disconnect():
     print("Eel disconnecting")
     return rfid.disconnect()
 
+
 @eel.expose
 def startInventory(antennas, tx_power, mode_identifier):
     print("Eel starting inventory")
-    rfid.changeConfig(antennas, tx_power, mode_identifier)
+    rfid.changeConfig(antennas, tx_power, mode_identifier, camera_mode=mode_identifier == 10)
     return rfid.startInventory()
+
 
 @eel.expose
 def stopInventory():
     print("Eel stopping inventory")
     return rfid.stopInventory()
+
 
 @eel.expose
 def changeFilters(whitelist, blacklist):
@@ -314,12 +347,15 @@ def onScriptClose():
     eel.closeGUI()
     rfid.kill_all()
 
+
 atexit.register(onScriptClose)
 
-def onGUIClose(a,b):
+
+def onGUIClose(a, b):
     print("GUI closed... killing")
     rfid.kill_all()
-    sys.exit()
+    sys.exit(1)
+
 
 if __name__ == "__main__":
     if (len(sys.argv) > 1 and sys.argv[1] == "--dev"):
@@ -328,9 +364,11 @@ if __name__ == "__main__":
         print("Expects the development version of react to be running on port 3000")
         print("It can be started with `npm start`")
         eel.init('../react/public')
-        eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+        eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=[
+                  "--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
     else:
         # Production
         print("Running in production mode:")
         eel.init('web')
-        eel.start("index.html", host="localhost", port=3467, size=(1200, 800), close_callback=onGUIClose, cmdline_args=["--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+        eel.start("index.html", host="localhost", port=3467, size=(1200, 800), close_callback=onGUIClose, cmdline_args=[
+                  "--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])

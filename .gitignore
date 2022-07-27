@@ -13,6 +13,7 @@ react/coverage
 react/build
 /dist
 *.spec
+cameradev
 
 # misc
 .DS_Store
@@ -27,6 +28,7 @@ yarn-error.log*
 
 # python
 python/venv
+python/venv_windows
 python/dist
 python/build
 python/web

@@ -1,25 +1,27 @@
 import time
 import math
+from workingImage import WorkingImage
 
 defs = {
     '0C': {
         'name': 'Acknowledgment',
-        'parser': lambda d : ackParser(d),
-        'parserString': lambda d : ackParserString(d)
+        'parser': lambda epc: ackParser(epc),
+        'parserString': lambda epc: ackParserString(epc)
     },
     '0B': {
         'name': 'Accelerometer',
-        'parser': lambda d : accelParser(d),
-        'parserString': lambda d : accelParserString(d)
+        'parser': lambda epc: accelParser(epc),
+        'parserString': lambda epc: accelParserString(epc)
     },
     'CA': {
         'name': 'Camera',
-        'parser': lambda d : cameraParser(d),
-        'parserString': lambda d : cameraParserString(d)
+        'parser': lambda epc: cameraParser(epc),
+        'parserString': lambda epc: cameraParserString(epc)
     }
 }
 
-def ackParser(d):
+
+def ackParser(epc):
     return {
         'sin': {
             'value': math.sin(time.time()),
@@ -33,20 +35,21 @@ def ackParser(d):
         }
     }
 
-def ackParserString(d):
-    parsed = ackParser(d)
+
+def ackParserString(epc):
+    parsed = ackParser(epc)
     return parsed['sin']['value']
 
-def accelParser(d):
+
+def accelParser(epc):
     def scale(raw):
         value = int(raw, 16)
         value = 100.0 * value / 1024.0
         return value
 
-    x = 1.13 * scale(d[4:8])  - 52.77
-    y = 1.15 * scale(d[0:4])  - 56.67
-    z = 1.10 * scale(d[8:12]) - 56.17
-
+    x = 1.13 * scale(epc[6:10]) - 52.77
+    y = 1.15 * scale(epc[2:6]) - 56.67
+    z = 1.10 * scale(epc[10:14]) - 56.17
 
     return {
         'x': {
@@ -66,31 +69,72 @@ def accelParser(d):
         }
     }
 
-    
 
-def accelParserString(d):
-    parsed = accelParser(d)
+def accelParserString(epc):
+    parsed = accelParser(epc)
     return '{:10.4f}, {:10.4f}, {:10.4f}'.format(parsed['x']['value'], parsed['y']['value'], parsed['z']['value'])
 
 
-def cameraParser(d):
+working_image = None
+
+
+def cameraParser(epc):
+    seq = int(epc[2:4], 16)
+    adc = None
+    pixels = None
+
+    if (seq == 254):
+        adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
+    else:
+        pixel_string = epc[4:24]
+        pixels = []
+
+        while len(pixel_string) > 0:
+            pixels.append(int(pixel_string[:2], 16))
+            pixel_string = pixel_string[2:]
+
+    global working_image
+    if (working_image is None):
+        working_image = WorkingImage()
+
+    working_image.add_tag(seq, adc, pixels)
+
     return {
         'seq_count': {
-            'value': int(d[0:2], 16),
+            'value': seq,
             'unit': 'unitless',
             'label': 'Sequence Count'
         },
         'adc': {
-            'value': int(d[2:6], 16) * .0041544477, # Based on 4.25 V max ADC range
+            'value': adc,
             'unit': 'V',
             'label': 'ADC'
         },
-        # 'pixels': {
-        #     for 
-        # }
+        'pixels': {
+            'value': pixels,
+            'unit': 'grayscale (256)',
+            'label': 'Pixels'
+        },
+        'image': {
+            'value': working_image.get_image(),
+            'unit': 'base64 string',
+            'label': 'Image'
+        }
     }
+
 
 def cameraParserString(d):
     parsed = cameraParser(d)
     # Format ADC: ##.## V, Seq: ###
-    return 'ADC: {:10.2f} V, Seq: {}'.format(parsed['adc']['value'], parsed['seq_count']['value'])
+    string = ""
+
+    if (parsed['seq_count']['value'] is not None):
+        string += 'Seq: {}, '.format(parsed['seq_count']['value'])
+
+    if (parsed['adc']['value'] is not None):
+        string += 'ADC: {:10.4f} V, '.format(parsed['adc']['value'])
+
+    if (parsed['image']['value'] is not None):
+        string += 'Image available, '
+
+    return string.rstrip(', ')
