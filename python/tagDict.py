@@ -3,12 +3,12 @@ import math
 from workingImage import WorkingImage
 
 defs = {
-    '0C': {
+    '0B': {
         'name': 'Acknowledgment',
         'parser': lambda epc: ackParser(epc),
         'parserString': lambda epc: ackParserString(epc)
     },
-    '0B': {
+    '0X': {
         'name': 'Accelerometer',
         'parser': lambda epc: accelParser(epc),
         'parserString': lambda epc: accelParserString(epc)
@@ -23,22 +23,16 @@ defs = {
 
 def ackParser(epc):
     return {
-        'sin': {
-            'value': math.sin(time.time()),
-            'unit': 'for testing only',
-            'label': 'sin'
-        },
-        'cos': {
-            'value': math.cos(time.time()),
-            'unit': 'for testing only',
-            'label': 'cos'
+        'ack': {
+            'value': 1,
+            'unit': 'N/A',
+            'label': 'ACK'
         }
     }
 
 
 def ackParserString(epc):
-    parsed = ackParser(epc)
-    return parsed['sin']['value']
+    return "N/A"
 
 
 def accelParser(epc):
@@ -115,6 +109,11 @@ def cameraParser(epc):
             'unit': 'grayscale (256)',
             'label': 'Pixels'
         },
+        'people_found': {
+            'value': working_image.get_person_count(),
+            'unit': 'people',
+            'label': 'People Found'
+        },
         'image': {
             'value': working_image.get_image(),
             'unit': 'base64 string',
@@ -133,6 +132,9 @@ def cameraParserString(d):
 
     if (parsed['adc']['value'] is not None):
         string += 'ADC: {:10.4f} V, '.format(parsed['adc']['value'])
+
+    if (parsed['people_found']['value'] is not None):
+        string += 'People: {}, '.format(parsed['people_found']['value'])
 
     if (parsed['image']['value'] is not None):
         string += 'Image available, '

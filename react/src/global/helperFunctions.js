@@ -16,7 +16,7 @@ export function getRelativeTime(time, starting = "", ending = 'ago') {
 
     var string;
 
-    if (delta < 5) {
+    if (delta < 2) {
         string = 'just now';
     } else if (delta < minute) {
         string = delta + ' seconds ' + ending;

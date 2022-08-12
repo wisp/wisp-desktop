@@ -18,7 +18,7 @@ const DataExporter = (props) => {
 // ['seen', 'epc', 'rssi', 'wispType', 'wispData', 'wispId']
 const defaultFields = [
     { label: 'Timestamp', value: 'seen' },
-    { label: 'Reader Timestamp', value: 'seen_reader'},
+    { label: 'Processing Time', value: 'processing_time'},
     { label: 'RSSI', value: 'rssi' },
     { label: 'EPC', value: 'epc' },
     { label: 'Wisp Type', value: 'wispType' },

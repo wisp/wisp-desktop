@@ -5,9 +5,11 @@ import time
 import atexit
 import sys
 from queue import Queue
-from threading import Thread
-
+from threading import Thread, Timer
 import tagDict
+import random
+import traceback
+
 
 
 class SllurpHandler(logging.StreamHandler):
@@ -33,7 +35,6 @@ class SllurpHandler(logging.StreamHandler):
 sllurp_logger = logging.getLogger('sllurp')
 sllurp_logger.setLevel(logging.DEBUG)
 sllurp_logger.addHandler(SllurpHandler())
-
 
 class RFIDReader:
 
@@ -80,7 +81,7 @@ class RFIDReader:
         self.resetReaderConfig()
 
         self.isKilled = False
-        self.tagQueue = Queue(maxsize=5000)
+        self.tagQueue = Queue(maxsize=1000)
         self.tagThread = Thread(target=self.process_tags,
                                 args=(self.tagQueue, self.isKilled,))
         self.tagThread.start()
@@ -258,12 +259,15 @@ class RFIDReader:
 
     def process_tags(self, queue, isKilled):
         while(not isKilled):
+            # print("Queue size: " + str(queue.qsize()))
             if queue.full():
                 print("The tag processing queue is full")
 
             try:
                 tag = queue.get()
+                # start_time = time.perf_counter()
                 newTag = {}
+                # print(newTag)
                 epc = str(tag['EPC'], 'utf-8').upper()
                 newTag['wispId'] = epc[20:24]
                 newTag['wispType'] = epc[0:2]
@@ -298,9 +302,16 @@ class RFIDReader:
                     except Exception as e:
                         print("Failed to use formatter:", e)
                         continue
-
+                    
+                    # newTag['formatted'] = {
+                    #     **newTag['formatted'],
+                    #     'processing_time': {
+                    #         'value': time.perf_counter() - start_time,
+                    #         'units': 'seconds',
+                    #         'label': 'Processing Time'
+                    #     }
+                    # }
                     eel.acceptTag(newTag)
-                    # self.count += 1
 
             except Exception as e:
                 print("Failed to parse tag:", e)
@@ -355,6 +366,15 @@ def onGUIClose(a, b):
     print("GUI closed... killing")
     rfid.kill_all()
     sys.exit(1)
+
+# tagRate = 1000
+# fakeTag = {'PeakRSSI': -61}
+# def generateFakeTag():
+#     fakeTag["LastSeenTimestampUTC"] = time.time() * 1000000
+#     fakeTag["EPC"] = b'CA' + bytes(str(random.randint(0, 9999999999999999999999)).zfill(22), 'utf-8')
+#     Timer(1/tagRate, generateFakeTag).start()
+#     rfid.tagQueue.put_nowait(fakeTag)
+# generateFakeTag()
 
 
 if __name__ == "__main__":

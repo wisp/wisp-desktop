@@ -37,7 +37,7 @@ try:
     # Build the python app to the dist folder using PyInstaller
     print("Building the python app with PyInstaller")
     os.chdir("python")
-    os.system("python -m eel main.py web --paths ./sllurp --windowed --onefile --name WISP_Desktop")
+    os.system("python3 -m eel main.py web --paths ./sllurp --windowed --onefile --name WISP_Desktop")
     os.chdir("..")
 
     # Moving the built app into the dist folder

@@ -2,6 +2,7 @@ from PIL import Image
 from io import BytesIO
 import base64
 import time
+import countPeople
 
 
 class WorkingImage():
@@ -13,27 +14,28 @@ class WorkingImage():
         self.BLOCK_SIZE = 200
         self.PIX_PER_TAG = 10
 
-        self.CLEAR_IMAGE_TIMEOUT = 60
-
-        # Changes for each image
+        # Refreshes before each new image is captured
         self.img = Image.new('L', (self.WIDTH, self.HEIGHT), )
         self.block_counter = 0
         self.prev_seq = 0
         self.captured_pixels = 0
-        self.img_b64 = None
 
-        # Keeps track of the last time the image was updated
-        self.prev_update_timestamp = 0
+        # Refreshes after each new image is captured
+        self.img_b64 = None
+        self.person_count = None
 
     def add_tag(self, seq, adc, pixels):
         # Make sure we're dealing with a new tag
         if seq <= 200 and seq != self.prev_seq:
             # If it's taken more than 20 seconds since the last tag, reset the image
-            time = time.time()
-            if (time - self.prev_update_timestamp) > self.CLEAR_IMAGE_TIMEOUT:
-                self.clear_capture()
-                print("Working image went stale, clearing")
-            self.prev_update_timestamp = time
+            # time = time.time()
+            # if (time - self.prev_update_timestamp) > self.CLEAR_IMAGE_TIMEOUT:
+            #     self.clear_capture()
+            #     print("Working image went stale, clearing")
+            # self.prev_update_timestamp = time
+            
+            # Remove the old image
+            self.img_b64 = None
 
             # Increment the block counter if seq jumps down
             if seq < self.prev_seq:
@@ -55,25 +57,20 @@ class WorkingImage():
             if self.captured_pixels >= (self.WIDTH * self.HEIGHT) * 0.25:
                 print('Captured {}% of image'.format(
                     self.captured_pixels / (self.WIDTH * self.HEIGHT) * 100))
-                img_buffer = BytesIO()
-                self.img.save(img_buffer, format='PNG')
-                self.img_b64 = base64.b64encode(
-                    img_buffer.getvalue()).decode('ascii')
+                (count, b64) = countPeople.count_people(self.img)
+                self.img_b64 = b64
+                self.person_count = count
 
             self.clear_capture()
 
     def get_image(self):
-        # if (self.sent_img_len != len(self.images)):
-        #     self.sent_img_len = len(self.images)
-        #     return self.images
-        # else:
-        #     return None
-
         return self.img_b64
+
+    def get_person_count(self):
+        return self.person_count
 
     def clear_capture(self):
         self.img = Image.new('L', (self.WIDTH, self.HEIGHT), )
         self.block_counter = 0
         self.prev_seq = 0
         self.captured_pixels = 0
-        self.img_b64 = None
