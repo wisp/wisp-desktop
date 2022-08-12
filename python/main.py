@@ -4,11 +4,12 @@ import logging
 import time
 import atexit
 import sys
+import os
 from queue import Queue
 from threading import Thread, Timer
 import tagDict
-import random
-import traceback
+# import random
+# import traceback
 
 
 
@@ -83,7 +84,8 @@ class RFIDReader:
         self.isKilled = False
         self.tagQueue = Queue(maxsize=1000)
         self.tagThread = Thread(target=self.process_tags,
-                                args=(self.tagQueue, self.isKilled,))
+                                args=(self.tagQueue,))
+        self.tagThread.setDaemon(True)
         self.tagThread.start()
 
     def forceFrontendUpdate(self):
@@ -257,66 +259,69 @@ class RFIDReader:
         for tag in reversed_tags:
             self.tagQueue.put_nowait(tag)
 
-    def process_tags(self, queue, isKilled):
-        while(not isKilled):
+    def process_tags(self, queue):
+        while(not self.isKilled):
             # print("Queue size: " + str(queue.qsize()))
             if queue.full():
                 print("The tag processing queue is full")
 
             try:
-                tag = queue.get()
                 # start_time = time.perf_counter()
-                newTag = {}
-                # print(newTag)
-                epc = str(tag['EPC'], 'utf-8').upper()
-                newTag['wispId'] = epc[20:24]
-                newTag['wispType'] = epc[0:2]
+                if (not queue.empty()):
+                    tag = queue.get()
+                    newTag = {}
+                    # print(newTag)
+                    epc = str(tag['EPC'], 'utf-8').upper()
+                    newTag['wispId'] = epc[20:24]
+                    newTag['wispType'] = epc[0:2]
 
-                if (newTag['wispType'] == 'CA'):
-                    newTag['wispId'] = 'CA00'
+                    if (newTag['wispType'] == 'CA'):
+                        newTag['wispId'] = 'CA00'
 
-                if ((not self.whitelist or newTag['wispId'] in self.whitelist) and newTag['wispId'] not in self.blacklist):
+                    if ((not self.whitelist or newTag['wispId'] in self.whitelist) and newTag['wispId'] not in self.blacklist):
 
-                    if self.timeOffset is None:
-                        self.timeOffset = time.time() - tag['LastSeenTimestampUTC'] / 1000000
-                    
-                    newTag['seen'] = tag['LastSeenTimestampUTC'] / 1000000 + self.timeOffset
+                        if self.timeOffset is None:
+                            self.timeOffset = time.time() - tag['LastSeenTimestampUTC'] / 1000000
+                        
+                        newTag['seen'] = tag['LastSeenTimestampUTC'] / 1000000 + self.timeOffset
 
-                    newTag['epc'] = epc
-                    newTag['wispData'] = epc[2:20]
-                    # newTag['wispHwRev'] = epc[18:20]
-                    newTag['rssi'] = tag['PeakRSSI']
-                    
-                    # Here we create formatted versions of the data. A
-                    # string version that can be rendered as text and an
-                    # object version that has the data, units and a label.
+                        newTag['epc'] = epc
+                        newTag['wispData'] = epc[2:20]
+                        # newTag['wispHwRev'] = epc[18:20]
+                        newTag['rssi'] = tag['PeakRSSI']
+                        
+                        # Here we create formatted versions of the data. A
+                        # string version that can be rendered as text and an
+                        # object version that has the data, units and a label.
 
-                    # The formatter depends on the type of tag, so check
-                    # tags.py for the different types.
-                    try:
-                        tagTools = tagDict.defs.get(newTag['wispType'])
-                        if tagTools:
-                            newTag['formattedString'] = tagTools.get(
-                                'parserString')(epc)
-                            newTag['formatted'] = tagTools.get('parser')(epc)
-                    except Exception as e:
-                        print("Failed to use formatter:", e)
-                        continue
-                    
-                    # newTag['formatted'] = {
-                    #     **newTag['formatted'],
-                    #     'processing_time': {
-                    #         'value': time.perf_counter() - start_time,
-                    #         'units': 'seconds',
-                    #         'label': 'Processing Time'
-                    #     }
-                    # }
-                    eel.acceptTag(newTag)
+                        # The formatter depends on the type of tag, so check
+                        # tags.py for the different types.
+                        try:
+                            tagTools = tagDict.defs.get(newTag['wispType'])
+                            if tagTools:
+                                newTag['formattedString'] = tagTools.get(
+                                    'parserString')(epc)
+                                newTag['formatted'] = tagTools.get('parser')(epc)
+                        except Exception as e:
+                            print("Failed to use formatter:", e)
+                            continue
+                        
+                        # newTag['formatted'] = {
+                        #     **newTag['formatted'],
+                        #     'processing_time': {
+                        #         'value': time.perf_counter() - start_time,
+                        #         'units': 'seconds',
+                        #         'label': 'Processing Time'
+                        #     }
+                        # }
+                        eel.acceptTag(newTag)
 
             except Exception as e:
                 print("Failed to parse tag:", e)
                 pass
-        return
+
+        print("Tag processing thread killed")
+        os._exit(0)
 
 
 rfid = RFIDReader()
@@ -365,7 +370,7 @@ atexit.register(onScriptClose)
 def onGUIClose(a, b):
     print("GUI closed... killing")
     rfid.kill_all()
-    sys.exit(1)
+    os._exit(1)
 
 # tagRate = 1000
 # fakeTag = {'PeakRSSI': -61}
