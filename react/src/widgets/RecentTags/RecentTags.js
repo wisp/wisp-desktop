@@ -139,7 +139,14 @@ const RecentTags = (props) => {
     const tableInstance = useTable({
         columns,
         data,
-
+        initialState: {
+            sortBy: [
+                {
+                    id: 'seen',
+                    desc: true
+                }
+            ]
+        },
         autoResetPage: false,
         autoResetExpanded: false,
         autoResetGroupBy: false,

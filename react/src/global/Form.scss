@@ -29,6 +29,10 @@ input {
         justify-content: flex-end;
     }
 
+    &.center {
+        justify-content: center;
+    }
+
     &.stretch {
         flex-grow: 1;
     }

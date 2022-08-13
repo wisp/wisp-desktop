@@ -7,14 +7,6 @@ import { TextField, FormGroup, Button, Switch, FormControlLabel, IconButton, Tog
 import ReaderConsole from 'components/connection/ReaderConsole/ReaderConsole';
 import { useAlert } from 'react-alert';
 
-const modes = {
-    0: "Tari: 7140μs, PIE:1500, BDR:640000, R: 1, C:0, M:2, Mod: 2",
-    1: "Tari: 12500μs, PIE:1500, BDR:160000, R: 0, C:0, M:2, Mod: 2",
-    2: "Tari: 25000μs, PIE:2000, BDR:256000, R: 1, C:1, M:3, Mod: 3",
-    3: "Tari: 25000μs, PIE:2000, BDR:256000, R: 1, C:0, M:3, Mod: 3",
-    4: "Tari: 7140μs, PIE:1500, BDR:640000, R: 1, C:1, M:2, Mod: 2",
-}
-
 const Network = (props) => {
     const alert = useAlert();
     const context = useContext(Connection);

@@ -16,7 +16,7 @@ export function getRelativeTime(time, starting = "", ending = 'ago') {
 
     var string;
 
-    if (delta < 5) {
+    if (delta < 2) {
         string = 'just now';
     } else if (delta < minute) {
         string = delta + ' seconds ' + ending;
@@ -105,8 +105,10 @@ export function getVariableListFromRecentTags(recentTags) {
                 const varKeys = Object.keys(tag.formatted);
                 for (let j = 0; j < varKeys.length; j++) {
                     const varKey = varKeys[j];
-                    if (!(varKey in variableList)) {
-                        variableList.push({var: varKey, unit: tag.formatted[varKey].unit, label: tag.formatted[varKey].label});
+                    if (!variableList.some(v => v.value === varKey)) {
+                        console.log("varKey: " + varKey)
+                        console.log("variableList: " + variableList)
+                        variableList.push({value: varKey, unit: tag.formatted[varKey].unit, label: tag.formatted[varKey].label});
                     }
                 }
             }

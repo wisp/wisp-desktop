@@ -1,0 +1,42 @@
+@import "/src/global/Global.scss";
+
+// center the image in the container, and scale it to fit the container
+
+.ImageCapture {
+    width: 100%;
+    height: 100%;
+
+    .img-contain {
+        width: 100%;
+    }
+
+    img {
+        height: 100%;
+        max-width: calc(100% - 120px);
+        image-rendering: pixelated;
+        object-fit: cover;
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        gap: 20px;
+    }
+
+    .no-image {
+        display: flex;
+        height: 100%;
+        width: 100%;
+        align-items: center;
+        background-color: $gray8;
+        border-radius: $smallRadius;
+
+        p {
+            width: 100%;
+            text-align: center;
+        }
+    }
+}
