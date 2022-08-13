@@ -1,22 +1,28 @@
 import time
 import math
+
 from workingImage import WorkingImage
 
 defs = {
-    '0B': {
+    'XX': {
         'name': 'Acknowledgment',
         'parser': lambda epc: ackParser(epc),
-        'parserString': lambda epc: ackParserString(epc)
+        'parserString': lambda parsed: ackParserString(parsed)
     },
-    '0X': {
+    '0B': {
         'name': 'Accelerometer',
         'parser': lambda epc: accelParser(epc),
-        'parserString': lambda epc: accelParserString(epc)
+        'parserString': lambda parsed: accelParserString(parsed)
     },
     'CA': {
         'name': 'Camera',
         'parser': lambda epc: cameraParser(epc),
-        'parserString': lambda epc: cameraParserString(epc)
+        'parserString': lambda parsed: cameraParserString(parsed)
+    },
+    '0F': {
+        'name': 'Temperature',
+        'parser': lambda epc: tempParser(epc),
+        'parserString': lambda parsed: tempParserString(parsed)
     }
 }
 
@@ -64,9 +70,8 @@ def accelParser(epc):
     }
 
 
-def accelParserString(epc):
-    parsed = accelParser(epc)
-    return '{:10.4f}, {:10.4f}, {:10.4f}'.format(parsed['x']['value'], parsed['y']['value'], parsed['z']['value'])
+def accelParserString(parsed):
+    return '{:.2f}, {:.2f}, {:.2f}'.format(parsed['x']['value'], parsed['y']['value'], parsed['z']['value'])
 
 
 working_image = None
@@ -122,8 +127,7 @@ def cameraParser(epc):
     }
 
 
-def cameraParserString(d):
-    parsed = cameraParser(d)
+def cameraParserString(parsed):
     # Format ADC: ##.## V, Seq: ###
     string = ""
 
@@ -140,3 +144,23 @@ def cameraParserString(d):
         string += 'Image available, '
 
     return string.rstrip(', ')
+
+def tempParser(epc):
+    def scale(raw):
+        value = int(raw, 16)
+        if value < 0 or value > 1024:
+            return ((value - 673) * 423) / 1024
+        else:
+            return "Invalid"
+
+    temp = scale(epc[2:4])
+    return {
+        'temp': {
+            'value': temp,
+            'unit': 'C',
+            'label': 'Temperature'
+        }
+    }
+
+def tempParserString(parsed):
+    return '{:.2f} C'.format(parsed['temp']['value'])
