@@ -9,10 +9,19 @@ import RecentTags from './RecentTags/RecentTags';
 import TemplateWidget from './_TemplateWidget/TemplateWidget';
 import DataExporter from './DataExporter/DataExporter';
 import ImgCapture from './ImgCapture/ImgCapture';
+import Gauge from './Gauge/Gauge';
 
 // 3. Add it to the widgets object with it's properties
 //    (icon names are from https://fonts.google.com/icons)
 const widgets = {
+    // TemplateWidget: {
+    //     "title": "Template Widget",
+    //     "component": <TemplateWidget/>,
+    //     "icon": "copy_all",
+    //     "maxSize": [null, null],
+    //     "minSize": [3, 3],
+    //     "defaultSize": [3, 3]
+    // },
     RecentTags: {
         title: "Recent Tags",
         component: <RecentTags/>,
@@ -20,14 +29,6 @@ const widgets = {
         maxSize: [null, null],
         minSize: [7, 2],
         defaultSize: [11, 4]
-    },
-    ImuDemo: {
-        title: "IMU Visualization",
-        component: <ImuDemo/>,
-        icon: "view_in_ar",
-        maxSize: [null, null],
-        minSize: [3, 4],
-        defaultSize: [4, 5]
     },
     Graph: {
         title: "Chart",
@@ -37,13 +38,13 @@ const widgets = {
         minSize: [7, 5],
         defaultSize: [11, 7]
     },
-    TemplateWidget: {
-        "title": "Template Widget",
-        "component": <TemplateWidget/>,
-        "icon": "copy_all",
-        "maxSize": [null, null],
-        "minSize": [3, 3],
-        "defaultSize": [3, 3]
+    Gauge: {
+        title: "Gauge",
+        component: <Gauge/>,
+        icon: "speed",
+        maxSize: [3, 4],
+        minSize: [3, 4],
+        defaultSize: [3, 4]
     },
     DataExporter: {
         "title": "Data Exporter",
@@ -53,6 +54,14 @@ const widgets = {
         "minSize": [4, 3],
         "defaultSize": [4, 3]
     },
+    ImuDemo: {
+        title: "IMU Visualization",
+        component: <ImuDemo/>,
+        icon: "view_in_ar",
+        maxSize: [null, null],
+        minSize: [3, 4],
+        defaultSize: [4, 5]
+    },
     ImgCapture: {
         "title": "Image Capture",
         "component": <ImgCapture/>,
@@ -61,7 +70,6 @@ const widgets = {
         "minSize": [4, 3],
         "defaultSize": [5, 4]
     },
-
 }
 
 export default widgets;
