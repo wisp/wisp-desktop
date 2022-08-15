@@ -2,7 +2,10 @@
 
 A GUI desktop interface for WISP tags, using [sllurp2](https://github.com/fviard/sllurp/tree/fviard-develop-v2/sllurp) for the RFID reader interface, and [react](https://github.com/facebook/react) and [eel](https://github.com/ChrisKnott/Eel) for the UI.
 
-Pre-built releases of the app are available in `releases/`.
+## Installing the app
+Pre-built releases of the app are available for Windows and Linux in [`/releases`](https://github.com/rmenon1008/wisp-desktop/tree/master/releases).
+
+You may have to bypass Windows Defender to run it.
 
 ## Building the app using the script
 1. Clone [sllurp2](https://github.com/fviard/sllurp/tree/fviard-develop-v2/sllurp) and install it
