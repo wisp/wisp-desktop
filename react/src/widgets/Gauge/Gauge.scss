@@ -1,0 +1,30 @@
+@import '/src/global/Global.scss';
+
+.gauge {
+    display: block;
+    width: min-content;
+    position: relative;
+    margin: auto;
+
+    .gauge-value {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        max-width: 55px;
+        word-wrap: break-word;
+        line-height: 0.8em;
+        font-size: 22px;
+        font-family: 'IBM Plex Mono';
+        font-weight: bold;
+        color: $gray3;
+        transform: translate(-50%, -50%);
+    }
+
+    .gauge-unit {
+        text-align: center;
+    }
+
+    .gauge-label {
+        text-align: center;
+    }
+}
