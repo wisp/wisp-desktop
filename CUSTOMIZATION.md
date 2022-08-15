@@ -14,7 +14,7 @@ Add an entry to the `dict` object in `tagDict.py`. The key is the wispType being
 
 ```python
 defs = {
-	'0B': {
+    '0B': {
         'name': 'Accelerometer',
         'parser': lambda epc : accelParser(epc),
         'parserString': lambda epc : accelParserString(epc),
