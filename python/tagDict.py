@@ -148,12 +148,13 @@ def cameraParserString(parsed):
 def tempParser(epc):
     def scale(raw):
         value = int(raw, 16)
-        if value < 0 or value > 1024:
-            return ((value - 673) * 423) / 1024
-        else:
-            return "Invalid"
+        # if value < 0 or value > 1024:
+        #     return ((value - 673) * 423) / 1024
+        # else:
+        #     return 0
+        return ((value - 673) * 423) / 1024
 
-    temp = scale(epc[2:4])
+    temp = scale(epc[3:6])
     return {
         'temp': {
             'value': temp,
