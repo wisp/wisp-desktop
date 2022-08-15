@@ -389,11 +389,11 @@ if __name__ == "__main__":
         print("Expects the development version of react to be running on port 3000")
         print("It can be started with `npm start`")
         eel.init('../react/public')
-        eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, cmdline_args=[
+        eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
                   "--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
     else:
         # Production
         print("Running in production mode:")
         eel.init('web')
-        eel.start("index.html", host="localhost", port=3467, size=(1200, 800), close_callback=onGUIClose, cmdline_args=[
+        eel.start("index.html", host="localhost", port=3467, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
                   "--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
