@@ -10,7 +10,7 @@ wispType ─┬┐  ┌─── wispData ───┐ ┌──┬─ wispId
 In order to process the tag, the app looks for a definition in `tagDict.py` with a matching `wispType`. If one is found, the defined `parser` and `parserString` are used to add formatted versions of the data to the tag report.
 
 ## Adding a new tag definition
-Add an entry to the `dict` object in `tagDict.py`. The key is the wispType being added. `name` should be a string. `parser` and `parserString` should be defined as lambda functions that accepts the full 24 character EPC (most of the time `WispData` is all you'll need to access).
+Add an entry to the `dict` object in `tagDict.py`. The key is the wispType being added. `name` should be a string. `parser` and `parserString` should be defined as lambda functions that accepts the full 24 character EPC (most of the time `wispData` is all you'll need to access).
 
 ```python
 defs = {
@@ -19,11 +19,11 @@ defs = {
         'parser': lambda epc : accelParser(epc),
         'parserString': lambda epc : accelParserString(epc),
     }
-	...
+    ...
 }
 ```
 
-`parserString` should return a readable string representation of the data. Parser should return an object with any number of entries, each with `value`, `unit` and `label` fields.
+`parserString` should return a readable string representation of the data. `parser` should return an object with any number of entries, each with `value`, `unit` and `label` fields.
 ```python
 def someParser(epc):
 	# Process data here
@@ -33,7 +33,7 @@ def someParser(epc):
             'unit': 'some units',     # String
             'label': 'Readable Name'  # String
         },
-		...
+	...
     }
 ```
 
@@ -56,7 +56,7 @@ Much like state, a change in the context a component is consuming causes the com
 Widgets should be placed in the `widgets` folder and follow the template below.
 ```jsx
 <Window title="Widget Title" right={<Icon small name="close" click={props.onClose} />}>
-	<InnerComponents>
+    <InnerComponents>
 </Window>
 ```
 
