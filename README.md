@@ -14,3 +14,6 @@ You may have to bypass Windows Defender to run it.
 4. Install js dependencies by running `npm install` from the react folder
 5. Run `python build_app.py`  
 From now on, just run the script after making changes.
+
+## Modifying the app
+It's relatively easy to add support for a custom WISP sensor type or create a new front-end widget for visualization. You can find the guide to do that in [`CUSTOMIZATION.md`](https://github.com/rmenon1008/wisp-desktop/tree/master/CUSTOMIZATION.md).
