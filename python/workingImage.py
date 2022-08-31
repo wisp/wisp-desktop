@@ -1,6 +1,6 @@
 from PIL import Image
-import countPeople
-
+import imageProcessing
+import eel
 
 class WorkingImage():
     def __init__(self):
@@ -24,13 +24,6 @@ class WorkingImage():
     def add_tag(self, seq, adc, pixels):
         # Make sure we're dealing with a new tag
         if seq <= 200 and seq != self.prev_seq:
-            # If it's taken more than 20 seconds since the last tag, reset the image
-            # time = time.time()
-            # if (time - self.prev_update_timestamp) > self.CLEAR_IMAGE_TIMEOUT:
-            #     self.clear_capture()
-            #     print("Working image went stale, clearing")
-            # self.prev_update_timestamp = time
-            
             # Remove the old image
             self.img_b64 = None
 
@@ -49,16 +42,22 @@ class WorkingImage():
                     self.captured_pixels += 1
                     self.img.putpixel((x, y), pixels[i])
 
+            self.img_b64 = imageProcessing.get_b64(self.img)
+
         elif seq == 255:
-            # Don't bother saving the image if there's less than 25% of the image
-            if self.captured_pixels >= (self.WIDTH * self.HEIGHT) * 0.25:
-                print('Captured {}% of image'.format(
-                    self.captured_pixels / (self.WIDTH * self.HEIGHT) * 100))
-                (count, b64) = countPeople.count_people(self.img)
-                self.img_b64 = b64
-                self.person_count = count
+            percent_captured = round(self.captured_pixels / (self.WIDTH * self.HEIGHT) * 100)
+
+            if percent_captured > 50:
+                print('Captured {}% of image'.format(percent_captured))
+                eel.createAlert('success', "Image captured", 'An image was captured with {}% of pixels'.format(percent_captured), 'photo_camera')
+                self.img_b64 = imageProcessing.get_b64_brighten(self.img)
 
             self.clear_capture()
+
+    def get_state(self):
+        if self.img is None:
+            return 'complete'
+        return 'incoming'
 
     def get_image(self):
         return self.img_b64
