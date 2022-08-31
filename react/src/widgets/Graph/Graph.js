@@ -1,63 +1,53 @@
 import './Graph.scss';
 import Window from 'components/window/Window/Window';
-import React, { useEffect, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useState, useContext, useRef, memo } from 'react';
 import { TagData, TagDataRecent } from 'dataManagement/EelListener';
 import Icon from 'components/Icon/Icon';
-import 'chartjs-adapter-moment';
-// import { getRelativeTime, getFormattedData, getWispType } from 'global/helperFunctions';
+
 import _ from "lodash";
 import { TextField, Button, IconButton, Select, MenuItem, FormControl, InputLabel, FormControlLabel, Checkbox } from '@mui/material';
 import ChipList from 'components/ChipList/ChipList';
 import Modal from 'components/Modal/Modal';
 import GraphModal from './GraphModal';
 import * as yup from 'yup';
-import { Line, Scatter } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    LinearScale,
-    TimeScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
+
 import { getVariableListFromRecentTags } from 'global/helperFunctions';
 import { useAlert } from 'react-alert';
 
+import uPlot from "uplot";
+// import "uplot/dist/uPlot.min.css";
 
-ChartJS.register(
-    LinearScale,
-    TimeScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
+import UPlotReact from "uplot-react";
 
 
 const Graph = (props) => {
+    const randKey = 'g' + (Math.random() + 1).toString(36).substring(7);
+    console.log("New rand key", randKey);
     return (
         <Window key={1} title="Chart" right={<Icon small name="close" click={props.onClose} />}>
-            <GraphInner />
+            <GraphInner randKey={randKey} />
         </Window >
     );
 }
 
+const defaultOptions = {
+    chartStyle: 'line',
+    tagNum: 2000,
+    timeAsX: true,
+    xSource: 'seen',
+    minX: undefined,
+    maxX: undefined,
+    ySource: 'value',
+    minY: undefined,
+    maxY: undefined,
+    plotIdsSeparate: true,
+}
+
 const GraphInner = (props) => {
-    const [graphOptions, setGraphOptions] = useState({
-        chartStyle: 'line',
-        tagNum: 500,
-        timeAsX: true,
-        xSource: 'seen',
-        minX: undefined,
-        maxX: undefined,
-        ySource: 'value',
-        minY: undefined,
-        maxY: undefined,
-        plotIdsSeparate: true,
-    });
+    // const [graphOptions, setGraphOptions] = useState(props.defaultOptions || defaultOptions);
+    const [graphOptions, setGraphOptions] = useState(defaultOptions);
+    console.log("Graph Inner Render" + props.randKey);
+    console.log("Graph Inner Render" + JSON.stringify(graphOptions));
 
     const alert = useAlert();
 
@@ -69,11 +59,13 @@ const GraphInner = (props) => {
     const recentContext = useContext(TagDataRecent);
     const recentData = recentContext.data;
 
+    const graphBodyRef = useRef(null);
+
     console.log(recentData);
     const varList = getVariableListFromRecentTags(recentData);
 
     function copyToClipboard() {
-        const canvas = document.getElementById('chart');
+        const canvas = document.querySelector('.' + props.randKey + ' .uplot canvas');
         if (canvas) {
             canvas.toBlob(function (blob) {
                 const item = new window.ClipboardItem({ "image/png": blob });
@@ -84,7 +76,7 @@ const GraphInner = (props) => {
     }
 
     function download() {
-        const canvas = document.getElementById('chart');
+        const canvas = document.querySelector('.' + props.randKey + ' .uplot canvas');
         if (canvas) {
             canvas.toBlob(function (blob) {
                 const item = new window.Blob([blob], { type: 'image/png' });
@@ -98,11 +90,10 @@ const GraphInner = (props) => {
             });
         }
     }
+
     return (
-        <div className='graph-body'>
-            <div className='graph-contain'>
-                <GraphBody data={data} options={graphOptions} />
-            </div>
+        <div className={'graph-body' + ' ' + props.randKey}>
+            <GraphBody data={data} options={graphOptions} randKey={props.randKey} />
             <div className="graph-options" style={{ paddingTop: 20 }}>
                 <div className="form-group stretch">
                     <Button
@@ -139,7 +130,7 @@ const GraphInner = (props) => {
                     </Modal>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 const graphValidationSchema = yup.object().shape({
@@ -155,115 +146,154 @@ const graphValidationSchema = yup.object().shape({
     plotIdsSeparate: yup.boolean(),
 });
 
+const processTags = _.throttle((newData, options) => {
+    const startTime = new Date();
+    const x = [];
+    const y = [];
+    if (newData) {
+        newData.forEach(tag => {
+            if (tag.formatted && tag.formatted[options.ySource] && (tag.formatted[options.xSource] || options.timeAsX)) {
+                if (options.timeAsX) {
+                    x.push(tag.seen);
+                } else {
+                    x.push(tag.formatted[options.xSource].value);
+                }
+                y.push(tag.formatted[options.ySource].value);
+            }
+        });
+    }
+    const endTime = new Date();
+    console.log(`processTags took ${endTime - startTime}ms`);
+    return [x, y];
+}, 100);
+
+const updateSize = _.throttle((width, height, setGraphOptions) => {
+    setGraphOptions(prev => ({ ...prev, width, height }));
+}, 100);
+
 const GraphBody = (props) => {
-    const [graphData, setGraphData] = useState({
-        datasets: [
+    const [graphData, setGraphData] = useState([]);
+    const [graphOptions, setGraphOptions] = useState({
+        width: 400,
+        height: 300,
+
+        legend: {
+            show: false,
+        },
+        series: [
             {
-                data: [],
+
             },
+            {
+                points: { show: false },
+                stroke: "gray",
+                width: 2,
+            }
         ],
-    });
-
-    const options = graphValidationSchema.validateSync(props.options);
-
-    let chartJsOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        events: [],
-        animation: {
-            duration: 0,
-        },
-        hover: {
-            animationDuration: 0
-        },
-        responsiveAnimationDuration: 0,
-        plugins: {
-            tooltip: { enabled: false },
-            legend: {
-                display: false,
-            },
-        },
         scales: {
             x: {
-                type: 'time',
-                bounds: 'data',
-                suggestedMax: 0,
-                gridLines: {
-                    offsetGridLines: false
-                },
-                ticks: {
-                    source: 'data',
-                    autoSkip: true,
-                    maxTicksLimit: 5,
-                    maxRotation: 0,
-                    alignment: 'end'
-                },
+                time: true,
             },
             y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                min: options.minY,
-                max: options.maxY,
-            },
-        },
-    };
-
-    if (!options.timeAsX) {
-        chartJsOptions.scales.x = {
-            type: 'linear',
-            min: options.minX,
-            max: options.maxX,
-        }
-    }
-
-    const throttle = useCallback(
-        _.throttle((newData) => {
-            const dataSet = [];
-            if (newData) {
-                for (let i = 0; i < newData.length; i++) {
-                    let graphPoint;
-                    if (newData[i].formatted) {
-                        if (!options.timeAsX) {
-                            graphPoint = {
-                                x: newData[i].formatted[options.xSource] ? newData[i].formatted[options.xSource].value : 0,
-                                y: newData[i].formatted[options.ySource] ? newData[i].formatted[options.ySource].value : 0,
-                            };
-                        }
-                        else {
-                            graphPoint = {
-                                x: newData[i].seen * 1000,
-                                y: newData[i].formatted[options.ySource] ? newData[i].formatted[options.ySource].value : undefined,
-                            };
-                        }
-                        dataSet.push(graphPoint);
-                    }
-                }
+                range: [props.options.minY || null, props.options.maxY || null],
             }
-
-            const dataObj = {
-                datasets: [
-                    {
-                        data: dataSet,
-                        borderColor: 'gray',
-                        backgroundColor: 'lightgray',
-                    },
-                ],
-            };
-            setGraphData(dataObj);
-        }, 1000),
-        [props.options]
-    );
+        },
+        axes: [
+            {},
+            {
+                labelFont: "13px 'IBM Plex Mono'",
+                font: "13px 'IBM Plex Mono'",
+                label: props.options.ySourceStr,
+            }
+        ]
+    });
 
     useEffect(() => {
-        throttle(props.data)
+        setGraphOptions({
+            width: 400,
+            height: 300,
+    
+            legend: {
+                show: false,
+            },
+            series: [
+                {
+    
+                },
+                {
+                    points: { show: false },
+                    stroke: "gray",
+                    width: 2,
+                }
+            ],
+            scales: {
+                x: {
+                    time: true,
+                },
+                y: {
+                    range: [props.options.minY || null, props.options.maxY || null],
+                }
+            },
+            axes: [
+                {
+                    labelFont: "13px 'IBM Plex Mono'",
+                    font: "13px 'IBM Plex Mono'"
+                },
+                {
+                    labelFont: "13px 'IBM Plex Mono'",
+                    font: "13px 'IBM Plex Mono'",
+                    label: props.options.ySourceStr
+                }
+            ]
+        })
+    } , [props.options]);
+
+    const options = graphValidationSchema.validateSync(props.options);
+    const graphContainRef = useRef(null);
+
+    console.log("Graph Body Render");
+
+    // if (!options.timeAsX) {
+    //     uPlotOptions.scales.x = {
+    //         time: false,
+    //         range: [props.options.minX, props.options.maxX],
+    //     }
+    // }
+
+    // const setSize = () => {
+    //     _.throttle(() => {
+    //         setGraphOptions(prev => ({ ...prev, width: entry.contentRect.width, height: entry.contentRect.height }));
+    //     })();
+    // }
+
+    useEffect(() => {
+        const myObserver = new ResizeObserver(entries => {
+            entries.forEach(entry => {
+                updateSize(entry.contentRect.width, entry.contentRect.height, setGraphOptions);
+            });
+        });
+        myObserver.observe(graphContainRef.current);
+        return () => myObserver.disconnect();
+    }, [props.options]);
+
+
+    useEffect(() => {
+        setGraphData(processTags(props.data, props.options));
     }, [props.data, props.options]);
 
-    if (props.options.chartStyle === 'line') {
-        return (<Line id="chart" options={chartJsOptions} data={graphData} />);
-    } else if (props.options.chartStyle === 'scatter') {
-        return (<Scatter id="chart" options={chartJsOptions} data={graphData} />);
-    }
+    return (
+        <div className={'graph-contain' + (graphData.length === 0 ? "" : " empty")} ref={graphContainRef}>
+            {props.randKey}
+            <UPlotReact
+                key={props.randKey}
+                options={graphOptions}
+                data={graphData}
+                onDelete={(/* chart: uPlot */) => console.log("Deleted from class " + props.randKey)}
+                onCreate={(/* chart: uPlot */) => console.log("Created from class" + props.randKey)}
+            />
+        </div>
+    );
 }
+// const GraphBodyMemo = memo(GraphBody);
 
 export default Graph;

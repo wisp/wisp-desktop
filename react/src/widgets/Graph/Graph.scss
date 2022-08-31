@@ -4,8 +4,6 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    
-    
 
     .graph-options {
         // flex-grow: 1;
@@ -15,5 +13,14 @@
         overflow: hidden;
         position: relative;
         flex-grow: 1;
+    }
+
+    .u-under {
+        display: none;
+    }
+
+    canvas {
+        max-width: 100%;
+        max-height: 100%;
     }
 }

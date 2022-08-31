@@ -4,6 +4,12 @@ import ChipList from 'components/ChipList/ChipList';
 const GraphModal = (props) => {
     const [graphOptions, setGraphOptions] = props.graphOptions;
 
+    const getSourceString = (source) => {
+        const variable = props.varList.find(item => item.value === source)
+        return variable.label + "(" + variable.unit + ")";
+    }
+
+
     return (
         <div>
             <h2>Chart</h2>
@@ -50,7 +56,7 @@ const GraphModal = (props) => {
                         id="demo-simple-select"
                         labelId="select-label"
                         value={graphOptions.xSource}
-                        onChange={(e) => { setGraphOptions({ ...graphOptions, xSource: e.target.value }) }}
+                        onChange={(e) => { setGraphOptions({ ...graphOptions, xSource: e.target.value, xSourceStr: getSourceString(e.target.value) }) } }
                     >
                         {/* <MenuItem value={'sin'}>Sine</MenuItem>
                         <MenuItem value={'cos'}>Cosine</MenuItem> */}
@@ -88,7 +94,7 @@ const GraphModal = (props) => {
                         id="demo-simple-select"
                         labelId="select-label"
                         value={graphOptions.ySource}
-                        onChange={(e) => { setGraphOptions({ ...graphOptions, ySource: e.target.value }) }}
+                        onChange={(e) => { setGraphOptions({ ...graphOptions, ySource: e.target.value, ySourceStr: getSourceString(e.target.value)}) }}
                     >
                         {props.varList &&
                             props.varList.map((variable) => {
