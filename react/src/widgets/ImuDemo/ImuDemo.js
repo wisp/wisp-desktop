@@ -54,7 +54,7 @@ const ImuDemoInner = (props) => {
 
             const pitch = 0;
 
-            setAngle([-roll, -yaw, -pitch]);
+            setAngle([-roll, -pitch, -yaw]);
         }
     }, [accelTag]);
 
