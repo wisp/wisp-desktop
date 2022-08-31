@@ -5,6 +5,14 @@ import { App } from './App';
 import reportWebVitals from './reportWebVitals';
 import { getQueriesForElement } from '@testing-library/react';
 
+// Replace console.* to disable logs in production
+if (process.env.NODE_ENV === 'production') {
+  console.log = () => {}
+  console.error = () => {}
+  console.debug = () => {}
+}
+
+
 ReactDOM.render(
   <React.StrictMode>
     <App />
