@@ -11,7 +11,7 @@ import ButtonMenu from 'components/ButtonMenu/ButtonMenu'
 import ErrorBoundary from 'components/ErrorBoundary/ErrorBoundary';
 
 import widgets from 'widgets/widgets.js';
-import { MenuItem, ListItemIcon } from '@mui/material';
+import { MenuItem, ListItemIcon, Button } from '@mui/material';
 
 const GridLayout = WidthProvider(Responsive);
 
@@ -58,7 +58,7 @@ const WindowManager = (props) => {
                 {windows.map(window => {
                     const cloned = cloneElement(
                         window.element,
-                        { onClose: () => removeWindow(window.key) }
+                        { onClose: () => removeWindow(window.key), defaultOptions: window.options }
                     );
 
                     return (
@@ -68,7 +68,7 @@ const WindowManager = (props) => {
                     );
                 })}
             </GridLayout>
-            
+
             <div style={{ position: 'fixed', bottom: '15px', right: '15px' }}>
                 {/* <ButtonDropdown
                     size="2"
@@ -116,9 +116,60 @@ const WindowManager = (props) => {
                     }
                 </ButtonMenu>
 
+                {/* <Button onClick={(e) => choosePreset('Camera Capture', addWindow)}>
+                    Image Viewer
+                </Button> */}
+
             </div>
         </div>
     );
 }
+
+// const choosePreset = (key, addWindow) => {
+//     let widget;
+//     switch (key) {
+//         case 'Camera Capture':
+//             addWindow({
+//                 x: 0, y: 0,
+//                 w: 18,
+//                 h: 5,
+//                 element: widgets.RecentTags.component,
+//                 minW: widgets.RecentTags.minSize[0] || 1,
+//                 minH: widgets.RecentTags.minSize[1] || 1,
+//                 maxW: widgets.RecentTags.maxSize[0] || Infinity,
+//                 maxH: widgets.RecentTags.maxSize[1] || Infinity,
+//                 title: widgets.RecentTags.title,
+//             });
+//             addWindow({
+//                 x: 0, y: 5,
+//                 w: widgets.Gauge.defaultSize[0],
+//                 h: widgets.Gauge.defaultSize[1],
+//                 element: widgets.Gauge.component,
+//                 minW: widgets.Gauge.minSize[0] || 1,
+//                 minH: widgets.Gauge.minSize[1] || 1,
+//                 maxW: widgets.Gauge.maxSize[0] || Infinity,
+//                 maxH: widgets.Gauge.maxSize[1] || Infinity,
+//                 title: widgets.Gauge.title,
+
+//                 options: {
+//                     dataSource: 'seq_count',
+//                 }
+//             });
+//             addWindow({
+//                 x: 0, y: 5,
+//                 w: widgets.ImgCapture.defaultSize[0],
+//                 h: widgets.ImgCapture.defaultSize[1],
+//                 element: widgets.ImgCapture.component,
+//                 minW: widgets.ImgCapture.minSize[0] || 1,
+//                 minH: widgets.ImgCapture.minSize[1] || 1,
+//                 maxW: widgets.ImgCapture.maxSize[0] || Infinity,
+//                 maxH: widgets.ImgCapture.maxSize[1] || Infinity,
+//                 title: widgets.ImgCapture.title,
+//             });
+//             break;
+//         default:
+//             break;
+//     }
+// }
 
 export default WindowManager;
