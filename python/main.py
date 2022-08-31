@@ -1,5 +1,6 @@
 from sllurp.llrp import LLRPReaderClient, LLRPReaderConfig, LLRPReaderState
 import eel
+
 import logging
 import time
 import atexit
@@ -7,6 +8,7 @@ import sys
 import os
 from queue import Queue
 from threading import Thread, Timer
+
 import tagDict
 # import random
 # import traceback
@@ -82,7 +84,7 @@ class RFIDReader:
         self.resetReaderConfig()
 
         self.isKilled = False
-        self.tagQueue = Queue(maxsize=1000)
+        self.tagQueue = Queue(maxsize=5000)
         self.tagThread = Thread(target=self.process_tags,
                                 args=(self.tagQueue,))
         self.tagThread.setDaemon(True)
@@ -250,8 +252,6 @@ class RFIDReader:
     def kill_all(self):
         self.isKilled = True
         self.tagThread.join()
-        self.stopInventory()
-        time.sleep(0.1)
         self.disconnect()
 
     def tag_seen(self, reader, tags):
@@ -389,7 +389,7 @@ if __name__ == "__main__":
         print("Expects the development version of react to be running on port 3000")
         print("It can be started with `npm start`")
         eel.init('../react/public')
-        eel.start({'port': 3000}, host="localhost", port=8888, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
+        eel.start({'port': 3000}, host="localhost", port=3467, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
                   "--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
     else:
         # Production
