@@ -96,18 +96,20 @@ const GraphInner = (props) => {
             <GraphBody data={data} options={graphOptions} randKey={props.randKey} />
             <div className="graph-options" style={{ paddingTop: 20 }}>
                 <div className="form-group stretch">
-                    <Button
+                    {/* <Button
                         variant="contained"
                         color="primary"
                         onClick={() => setShowModal(true)}
                     >
                         Options
-                    </Button>
+                    </Button> */}
+                    <GraphModal graphOptions={[graphOptions, setGraphOptions]} varList={varList} />
 
-                    <span style={{ width: '100%', display: "flex", justifyContent: 'flex-end' }}>
+                    <span style={{ flexGrow: 1, display: "flex", justifyContent: 'flex-end' }}>
                         <IconButton
                             variant='contained'
                             size="small"
+                            sx={{ width: 55 }}
                             onClick={() => copyToClipboard()}
                         >
                             <Icon small name="copy" />
@@ -115,19 +117,20 @@ const GraphInner = (props) => {
                         <IconButton
                             variant='contained'
                             size="small"
+                            sx={{ width: 55 }}
                             onClick={() => download()}
                         >
                             <Icon small name="download" />
                         </IconButton>
                     </span>
-                    <Modal
+                    {/* <Modal
                         show={showModal}
                         title="Chart Options"
                         // width={400}
                         close={() => setShowModal(false)}
                     >
                         <GraphModal graphOptions={[graphOptions, setGraphOptions]} varList={varList} close={() => setShowModal(false)} />
-                    </Modal>
+                    </Modal> */}
                 </div>
             </div>
         </div >
@@ -192,7 +195,8 @@ const GraphBody = (props) => {
         ],
         scales: {
             x: {
-                time: true,
+                time: props.options.timeAsX,
+                range: [props.options.minX || null, props.options.maxX || null],
             },
             y: {
                 range: [props.options.minY || null, props.options.maxY || null],
@@ -214,16 +218,24 @@ const GraphBody = (props) => {
             height: 300,
     
             legend: {
-                show: false,
+                // show: false,
+                position: 'top',
             },
             series: [
-                {
-    
+                {   
+                    label: "Time",
+                    value: (self, unix) => {
+                        const time = new Date(unix * 1000);
+                        return time.toLocaleTimeString();
+                    }
                 },
                 {
                     points: { show: false },
                     stroke: "gray",
                     width: 2,
+
+                    label: (props.options.ySourceStr ? props.options.ySourceStr.replace(/ *\([^)]*\) */g, "") : ""),
+                    value: (self, rawValue) => Math.round(rawValue * 100) / 100,
                 }
             ],
             scales: {
@@ -276,14 +288,12 @@ const GraphBody = (props) => {
         return () => myObserver.disconnect();
     }, [props.options]);
 
-
     useEffect(() => {
         setGraphData(processTags(props.data, props.options));
     }, [props.data, props.options]);
 
     return (
         <div className={'graph-contain' + (graphData.length === 0 ? "" : " empty")} ref={graphContainRef}>
-            {props.randKey}
             <UPlotReact
                 key={props.randKey}
                 options={graphOptions}
