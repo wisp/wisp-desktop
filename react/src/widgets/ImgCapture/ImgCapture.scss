@@ -12,9 +12,9 @@
 
     img {
         height: 100%;
-        max-width: calc(100% - 120px);
+        width: 100%;
         image-rendering: pixelated;
-        object-fit: cover;
+        object-fit: contain;
     }
 
     .btn-group {

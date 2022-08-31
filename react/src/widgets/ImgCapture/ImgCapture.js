@@ -15,14 +15,19 @@ const ImgCapture = (props) => {
 
 const ImgCaptureInner = (props) => {
     let images = [];
-    let counts = [];
     const [currImage, setCurrImage] = useState(0);
     const data = useContext(TagData).data;
+
     for (const tag of data) {
         if (tag.wispType === 'CA' && tag.formatted.image.value) {
             if (!images.includes(tag.formatted.image.value)) {
-                images.push(tag.formatted.image.value);
-                counts.push(tag.formatted.people_found.value);
+                if (tag.formatted.seq_count.value == 255) {
+                    // This is a new, complete image, so add it to the list
+                    images.unshift(tag.formatted.image.value);
+                } else {
+                    // Update the working image if it's still in progress
+                    images[0] = tag.formatted.image.value;
+                }
             }
         }
     }
@@ -43,10 +48,10 @@ const ImgCaptureInner = (props) => {
                 </Button>
                 {
                     images.length > 0 ?
-                        (<Fragment>
-                            <h2>People Found: {counts[currImage]}</h2>
+                        (<div style={{ flexGrow: '1' }}>
+                            {/* <h2>People Found: {counts[currImage]}</h2> */}
                             <img src={"data:image/png;base64," + images[currImage]} />
-                        </Fragment>)
+                        </div>)
                         :
                         (<div className='no-image'>
                             <p>No image captured</p>
