@@ -23,9 +23,16 @@ defs = {
         'name': 'Temperature',
         'parser': lambda epc: tempParser(epc),
         'parserString': lambda parsed: tempParserString(parsed)
-    }
+    },
+    # '03': {
+    #     'name': 'Microphone',
+    #     'parser': lambda epc: micParser(epc),
+    #     'parserString': lambda parsed: micParserString(parsed)
+    # }
 }
 
+
+### Acknowledgement Tag ###
 
 def ackParser(epc):
     return {
@@ -40,6 +47,8 @@ def ackParser(epc):
 def ackParserString(epc):
     return "N/A"
 
+
+### Accelerometer Tag ###
 
 def accelParser(epc):
     def scale(raw):
@@ -74,13 +83,14 @@ def accelParserString(parsed):
     return '{:.2f}, {:.2f}, {:.2f}'.format(parsed['x']['value'], parsed['y']['value'], parsed['z']['value'])
 
 
-working_image = None
+### Camera Tag ###
 
-
+working_images = {} # This keeps track of all the images that have been started
 def cameraParser(epc):
     seq = int(epc[2:4], 16)
     adc = None
     pixels = None
+    wisp_id = "CA00" # Right now, all camera tags have the same ID, but they don't have to.
 
     if (seq == 254):
         adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
@@ -92,11 +102,11 @@ def cameraParser(epc):
             pixels.append(int(pixel_string[:2], 16))
             pixel_string = pixel_string[2:]
 
-    global working_image
-    if (working_image is None):
-        working_image = WorkingImage()
+    global working_images
+    if (wisp_id not in working_images):
+        working_images[wisp_id] = WorkingImage()
 
-    working_image.add_tag(seq, adc, pixels)
+    working_images[wisp_id].add_tag(seq, adc, pixels)
 
     return {
         'seq_count': {
@@ -114,18 +124,22 @@ def cameraParser(epc):
             'unit': 'grayscale (256)',
             'label': 'Pixels'
         },
-        'people_found': {
-            'value': working_image.get_person_count(),
-            'unit': 'people',
-            'label': 'People Found'
+        # 'people_found': {
+        #     'value': working_image.get_person_count(),
+        #     'unit': 'people',
+        #     'label': 'People Found'
+        # },
+        'state': {
+            'value': working_images[wisp_id].get_state(),
+            'unit': '',
+            'label': 'State'
         },
         'image': {
-            'value': working_image.get_image(),
+            'value': working_images[wisp_id].get_image(),
             'unit': 'base64 string',
             'label': 'Image'
         }
     }
-
 
 def cameraParserString(parsed):
     # Format ADC: ##.## V, Seq: ###
@@ -137,13 +151,18 @@ def cameraParserString(parsed):
     if (parsed['adc']['value'] is not None):
         string += 'ADC: {:10.4f} V, '.format(parsed['adc']['value'])
 
-    if (parsed['people_found']['value'] is not None):
-        string += 'People: {}, '.format(parsed['people_found']['value'])
+    # if (parsed['people_found']['value'] is not None):
+    #     string += 'People: {}, '.format(parsed['people_found']['value'])
 
-    if (parsed['image']['value'] is not None):
+    if (parsed['state']['value'] == 'complete'):
         string += 'Image available, '
+    elif (parsed['state']['value'] == 'incoming'):
+        string += 'Incoming image, '
 
     return string.rstrip(', ')
+
+
+### Temperature Tag ###
 
 def tempParser(epc):
     def scale(raw):
@@ -165,3 +184,12 @@ def tempParser(epc):
 
 def tempParserString(parsed):
     return '{:.2f} C'.format(parsed['temp']['value'])
+
+
+# ### Microphone Tag ###
+# workingRecordings = {} # This keeps track of all the recordings that have been started
+# def micParser(epc):
+#     wispID = epc[8:12]
+#     if wispID not in workingRecordings:
+#         workingRecordings[wispID] = WorkingRecording()
+#     workingRecordings[wispID].add_tag(epc)
