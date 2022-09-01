@@ -180,6 +180,7 @@ class RFIDReader:
         if self.isConnected:
             if not self.isInventoryRunning:
                 try:
+                    self.timeOffset = None # Reset the time offset
                     self.reader.llrp.update_config(
                         LLRPReaderConfig(self.fac_args))
                     try:
@@ -285,9 +286,11 @@ class RFIDReader:
                         
                         newTag['seen'] = tag['LastSeenTimestampUTC'] / 1000000 + self.timeOffset
 
+                        newTag['seenPy'] = time.time()
+
                         newTag['epc'] = epc
                         newTag['wispData'] = epc[2:20]
-                        # newTag['wispHwRev'] = epc[18:20]
+                        newTag['wispHwRev'] = epc[18:20]
                         newTag['rssi'] = tag['PeakRSSI']
                         
                         # Here we create formatted versions of the data. A
@@ -302,6 +305,7 @@ class RFIDReader:
                                 newTag['formatted'] = tagTools.get('parser')(epc)
                                 newTag['formattedString'] = tagTools.get(
                                     'parserString')(newTag['formatted'])
+                                newTag["formattedType"] = tagTools.get('name')
                         except Exception as e:
                             print("Failed to use formatter:", e)
                             continue
