@@ -4,7 +4,7 @@ import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { useTable, useSortBy } from 'react-table';
 import { TagDataRecent } from 'dataManagement/EelListener';
 import Icon from 'components/Icon/Icon';
-import { getRelativeTime, getWispType } from 'global/helperFunctions';
+import { getRelativeTime } from 'global/helperFunctions';
 import { IconButton, Tooltip } from '@mui/material';
 import { Connection } from 'dataManagement/ConnectionContext';
 
@@ -46,9 +46,14 @@ const RecentTags = (props) => {
             },
             {
                 Header: 'Tag Type',
-                accessor: 'wispType',
-                Cell: ({ cell: { value } }) => getWispType(value),
+                accessor: 'formattedType',
                 width: 150,
+                
+            },
+            {
+                Header: 'HW Rev',
+                accessor: 'wispHwRev',
+                width: 65,
             },
             {
                 Header: 'Data',

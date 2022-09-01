@@ -21,11 +21,9 @@ import UPlotReact from "uplot-react";
 
 
 const Graph = (props) => {
-    const randKey = 'g' + (Math.random() + 1).toString(36).substring(7);
-    console.log("New rand key", randKey);
     return (
-        <Window key={1} title="Chart" right={<Icon small name="close" click={props.onClose} />}>
-            <GraphInner randKey={randKey} />
+        <Window title="Chart" right={<Icon small name="close" click={props.onClose} />}>
+            <GraphInner randKey={props.randKey} />
         </Window >
     );
 }
@@ -93,7 +91,7 @@ const GraphInner = (props) => {
 
     return (
         <div className={'graph-body' + ' ' + props.randKey}>
-            <GraphBody data={data} options={graphOptions} randKey={props.randKey} />
+            <GraphBody data={data} options={graphOptions} randKey={props.randKey} key={props.randKey}/>
             <div className="graph-options" style={{ paddingTop: 20 }}>
                 <div className="form-group stretch">
                     {/* <Button
@@ -103,7 +101,7 @@ const GraphInner = (props) => {
                     >
                         Options
                     </Button> */}
-                    <GraphModal graphOptions={[graphOptions, setGraphOptions]} varList={varList} />
+                    <GraphModal graphOptions={[graphOptions, setGraphOptions]} varList={varList} key={props.randKey}/>
 
                     <span style={{ flexGrow: 1, display: "flex", justifyContent: 'flex-end' }}>
                         <IconButton
@@ -294,8 +292,9 @@ const GraphBody = (props) => {
 
     return (
         <div className={'graph-contain' + (graphData.length === 0 ? "" : " empty")} ref={graphContainRef}>
+            {props.randKey}
             <UPlotReact
-                key={props.randKey}
+                // key={props.randKey}
                 options={graphOptions}
                 data={graphData}
                 onDelete={(/* chart: uPlot */) => console.log("Deleted from class " + props.randKey)}
@@ -304,6 +303,5 @@ const GraphBody = (props) => {
         </div>
     );
 }
-// const GraphBodyMemo = memo(GraphBody);
 
 export default Graph;

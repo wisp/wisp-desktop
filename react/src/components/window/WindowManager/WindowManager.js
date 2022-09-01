@@ -32,6 +32,12 @@ const WindowManager = (props) => {
         setWindows(windows.filter(window => window.key !== key));
     }
 
+    // function saveLayout() {
+    //     console.log("Saving layout");
+    //     console.log("Windows: ", JSON.stringify(windows))
+    // }
+
+
     useEffect(() => {
         console.log(element.current.offsetWidth);
         var ro = new ResizeObserver(entries => {
@@ -58,7 +64,7 @@ const WindowManager = (props) => {
                 {windows.map(window => {
                     const cloned = cloneElement(
                         window.element,
-                        { onClose: () => removeWindow(window.key), defaultOptions: window.options }
+                        { onClose: () => removeWindow(window.key), defaultOptions: window.options, key: window.key, randKey: window.key }
                     );
 
                     return (
@@ -84,10 +90,6 @@ const WindowManager = (props) => {
                 >
                     <Icon name="add" />
                 </ButtonDropdown> */}
-
-                {/* <Button size="2" level="1" click={() => addWindow({ x: 0, y: 0, w: 3, h: 8, element: <RecentTags /> })}>
-                    <Icon name="add" />
-                </Button> */}
                 <ButtonMenu
                     buttonLabel={(<span><Icon name="add" />&nbsp;&nbsp;Add Widget</span>)}
                 >
@@ -115,6 +117,13 @@ const WindowManager = (props) => {
                         })
                     }
                 </ButtonMenu>
+                
+                {/* <Button size="2" level="1" onClick={() => saveLayout()}>
+                    <Icon name="add" />
+                </Button>
+                <Button size="2" level="1" onClick={() => loadLayout()}>
+                    <Icon name="minus" />
+                </Button> */}
 
                 {/* <Button onClick={(e) => choosePreset('Camera Capture', addWindow)}>
                     Image Viewer
