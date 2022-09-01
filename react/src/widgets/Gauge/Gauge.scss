@@ -1,30 +1,42 @@
 @import '/src/global/Global.scss';
 
-.gauge {
-    display: block;
-    width: min-content;
-    position: relative;
-    margin: auto;
 
-    .gauge-value {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        max-width: 55px;
-        word-wrap: break-word;
-        line-height: 0.8em;
-        font-size: 22px;
-        font-family: 'IBM Plex Mono';
-        font-weight: bold;
-        color: $gray3;
-        transform: translate(-50%, -50%);
-    }
+.gauge-contain {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 
-    .gauge-unit {
-        text-align: center;
-    }
+    .gauge {
+        display: block;
+        // width: min-content;
+        flex-grow: 1;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        margin: auto;
+        aspect-ratio: 1;
 
-    .gauge-label {
-        text-align: center;
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            max-width: 55px;
+            word-wrap: break-word;
+            line-height: 0.8em;
+            font-size: 22px;
+            font-family: 'IBM Plex Mono';
+            font-weight: bold;
+            color: $gray3;
+            transform: translate(-50%, -50%);
+        }
+
+        .gauge-unit {
+            text-align: center;
+        }
+
+        .gauge-label {
+            text-align: center;
+        }
     }
 }

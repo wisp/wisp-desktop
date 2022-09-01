@@ -1,5 +1,5 @@
 import Window from 'components/window/Window/Window'
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { TagData, TagDataRecent } from 'dataManagement/EelListener';
 import { Connection } from 'dataManagement/ConnectionContext';
 import { CircularProgress, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
@@ -33,10 +33,12 @@ const GaugeInner = (props) => {
 
     const tagDataRecent = useContext(TagDataRecent).data;
     const varList = getVariableListFromRecentTags(tagDataRecent);
+    const gaugeRef = useRef(null);
 
     const [dataSource, setDataSource] = useState(null);
     const [range, setRange] = useState([0, 100]);
     const [value, setValue] = useState(0);
+    const [size, setSize] = useState(130);
 
     useEffect(() => {
         if (dataSource && RANGES[dataSource]) {
@@ -59,11 +61,22 @@ const GaugeInner = (props) => {
         setValue(workingVal);
     }, [dataSource, tagDataRecent]);
 
+
+    useEffect(() => {
+        const myObserver = new ResizeObserver(entries => {
+            entries.forEach(entry => {
+                setSize(entry.contentRect.height);
+            });
+        });
+        myObserver.observe(gaugeRef.current);
+        return () => myObserver.disconnect();
+    }, [props.options]);
+
     return (
-        <div>
-            <div className='gauge'>
+        <div className="gauge-contain">
+            <div className='gauge' ref={gaugeRef}>
                 <CircularProgress
-                    size={135}
+                    size={size}
                     thickness={6}
                     value={72.2}
                     variant="determinate"
@@ -80,7 +93,7 @@ const GaugeInner = (props) => {
                     }}
                 />
                 <CircularProgress
-                    size={135}
+                    size={size}
                     thickness={6}
                     value={Math.min(Math.max(((value - range[0]) / (range[1] - range[0])), 0), 1) * 72.2}
                     variant="determinate"
@@ -93,10 +106,12 @@ const GaugeInner = (props) => {
                 />
                 <div className='gauge-value'>{Math.round(value * 10) / 10}</div>
             </div>
-            <div style={{ width: 200, margin: 'auto' }}>
+            <div style={{ width: '100%', margin: 'auto' }}>
                 <FormControl fullWidth variant='filled'>
-                    <InputLabel id="select-label">Data source</InputLabel>
+                    <InputLabel fullWidth id="select-label">Data source</InputLabel>
                     <Select
+                        fullWidth
+
                         labelId="select-label"
                         value={dataSource}
                         onChange={(e) => { setDataSource(e.target.value) }}

@@ -42,9 +42,9 @@ const widgets = {
         title: "Gauge",
         component: <Gauge/>,
         icon: "speed",
-        maxSize: [3, 4],
-        minSize: [3, 4],
-        defaultSize: [3, 4]
+        maxSize: [5, 8],
+        minSize: [2, 4],
+        defaultSize: [2, 4]
     },
     DataExporter: {
         "title": "Data Exporter",
