@@ -83,6 +83,7 @@ const EelListener = (props) => {
     
     function addTag(tag) {
         if (!temporarilyPausedRef.current) {
+            tag.seenUI = new Date().getTime() / 1000;
             const index = locationOf(tag, tagDataRef.current, timestampCompare);
             setTagData([...tagDataRef.current.slice(0, index), tag, ...tagDataRef.current.slice(index)]);
 
