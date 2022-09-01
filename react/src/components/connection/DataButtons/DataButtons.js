@@ -1,6 +1,6 @@
 import Icon from 'components/Icon/Icon';
 import { useState, useContext } from 'react';
-import { Button, FormGroup, Tooltip } from '@mui/material';
+import { Button, FormGroup, Tooltip, TextField } from '@mui/material';
 import { Connection } from 'dataManagement/ConnectionContext';
 import ChipList from 'components/ChipList/ChipList';
 import { TagData, TagDataRecent, TagDataModifiers } from 'dataManagement/EelListener';
@@ -17,16 +17,20 @@ const DataButtons = (props) => {
     const [setTagData, setTagDataRecent] = useContext(TagDataModifiers);
     const [clearModal, setClearModal] = useState(false);
     const [loadModal, setLoadModal] = useState(false);
+    const [saveModal, setSaveModal] = useState(false);
+    const [saveName, setSaveName] = useState("");
     const connectionStatus = useContext(Connection).connectionStatus;
 
     let newDataToLoad = [];
 
-    function saveData() {
-        const exportName = "WISP_Tag_Data";
+    function saveData(name) {
+        if (name === "") {
+            name = "WISP_Tag_Data";
+        }
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tagData));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", exportName + ".json");
+        downloadAnchorNode.setAttribute("download", name + ".json");
         document.body.appendChild(downloadAnchorNode); // required for firefox
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
@@ -71,22 +75,9 @@ const DataButtons = (props) => {
                 <Icon name="delete" small />&nbsp;
                 Clear
             </Button>
-            <Button
-                size='small'
-                variant="outlined"
-                color="primary"
-                disabled={!availableToClear || connectionStatus.isInventorying}
-                sx={{ width: "31%", mr: 1 }}
-                onClick={() => {
-                    saveData();
-                }}
-            >
-                <Icon name="download" small />&nbsp;
-                Save
-            </Button>
             <Modal show={clearModal} title="Clear Session Data" close={() => setClearModal(false)}>
                 <p>Are you sure you want to delete all collected tag data?</p>
-                <div class="spacer-15"/>
+                <div class="spacer-15" />
                 <p>You have <strong>{tagData.length} total tag reads</strong> in this session, with <strong>{Object.keys(tagDataRecent).length} unique WISP IDs</strong>.</p>
                 <div className="spacer-2" />
                 <div className="form-group right">
@@ -110,6 +101,53 @@ const DataButtons = (props) => {
                     </Button>
                 </div>
             </Modal>
+            <Button
+                size='small'
+                variant="outlined"
+                color="primary"
+                disabled={!availableToClear || connectionStatus.isInventorying}
+                sx={{ width: "31%", mr: 1 }}
+                onClick={() => {
+                    // saveData();
+                    setSaveModal(true);
+                }}
+            >
+                <Icon name="download" small />&nbsp;
+                Save
+            </Button>
+            <Modal show={saveModal} title="Save Session Data" close={() => setSaveModal(false)}>
+                <TextField
+                    variant="filled"
+                    label="Session name"
+                    placeholder="WISP_Tag_Data"
+                    value={saveName}
+                    onChange={(e) => setSaveName(e.target.value)}
+                    fullWidth
+                    autoFocus
+                />
+                <div className="spacer-2" />
+                <div className="form-group right">
+                    <Button
+                        color="primary"
+                        onClick={() => {
+                            setSaveModal(false);
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        type="submit"
+                        onClick={() => {
+                            saveData(saveName);
+                            setSaveModal(false);
+                        }}
+                    >
+                        Save
+                    </Button>
+                </div>
+            </Modal>
 
             <Button
                 variant="outlined"
@@ -127,7 +165,7 @@ const DataButtons = (props) => {
             </Button>
             <Modal show={loadModal} title="Load Session Data" close={() => setLoadModal(false)}>
                 {/* <p>Load session data from a file.</p> */}
-                <FileUpload callback={newData}/>
+                <FileUpload callback={newData} />
                 <div className="spacer-2" />
                 <div className="form-group right">
                     <Button
