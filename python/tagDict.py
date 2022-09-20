@@ -11,13 +11,23 @@ defs = {
     },
     '0B': {
         'name': 'Accelerometer',
-        'parser': lambda epc: accelParser(epc),
+        'parser': lambda epc: accelParser(epc, type="0B"),
+        'parserString': lambda parsed: accelParserString(parsed)
+    },
+    '0C': {
+        'name': 'Accelerometer',
+        'parser': lambda epc: accelParser(epc, type="0C"),
         'parserString': lambda parsed: accelParserString(parsed)
     },
     'CA': {
         'name': 'Camera',
         'parser': lambda epc: cameraParser(epc),
         'parserString': lambda parsed: cameraParserString(parsed)
+    },
+    'AD': {
+        'name': 'Audio',
+        'parser': lambda epc: audioParser(epc),
+        'parserString': lambda parsed: audioParserString(parsed)
     },
     '0F': {
         'name': 'Temperature',
@@ -50,15 +60,22 @@ def ackParserString(epc):
 
 ### Accelerometer Tag ###
 
-def accelParser(epc):
+def accelParser(epc, type="0B"):
     def scale(raw):
         value = int(raw, 16)
-        value = 100.0 * value / 1024.0
-        return value
+        if type == "0C":
+            value = ((100.0 * value / 256.0) - 50)  # Convert to value between -50 and 50
+            return 0.392 * value
+        else:
+            value = ((100.0 * value / 1024.0) - 50)  # Convert to value between -50 and 50
+            return 1.13 * value
 
-    x = 1.13 * scale(epc[6:10]) - 52.77
-    y = 1.15 * scale(epc[2:6]) - 56.67
-    z = 1.10 * scale(epc[10:14]) - 56.17
+    x = scale(epc[6:10])
+    z = scale(epc[10:14])
+
+    y = scale(epc[2:6])
+    if type == "0C":
+        y = -y
 
     return {
         'x': {
@@ -98,6 +115,7 @@ def cameraParser(epc):
         pixel_string = epc[4:24]
         pixels = []
 
+        # Each pixel is 1 byte
         while len(pixel_string) > 0:
             pixels.append(int(pixel_string[:2], 16))
             pixel_string = pixel_string[2:]
@@ -136,7 +154,7 @@ def cameraParser(epc):
         },
         'image': {
             'value': working_images[wisp_id].get_image(),
-            'unit': 'base64 string',
+            'unit': 'base64 png',
             'label': 'Image'
         }
     }
@@ -158,6 +176,75 @@ def cameraParserString(parsed):
         string += 'Image available, '
     elif (parsed['state']['value'] == 'incoming'):
         string += 'Incoming image, '
+
+    return string.rstrip(', ')
+
+
+### Audio Tag ###
+
+working_recordings = {} # This keeps track of all the recordings that have been started
+def audioParser(epc):
+    seq = int(epc[2:4], 16)
+    adc = None
+    samples = None
+    wisp_id = "AD00" # Right now, all audio tags have the same ID, but they don't have to.
+
+    if (seq == 254):
+        adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
+    else:
+        sample_string = epc[4:24]
+        samples = []
+
+        # Each sample is 4 bits
+        while len(sample_string) > 0:
+            samples.append(int(sample_string[:1], 16))
+            sample_string = sample_string[1:]
+
+    global working_recordings
+    if (wisp_id not in working_recordings):
+        working_recordings[wisp_id] = WorkingRecording()
+
+    working_recordings[wisp_id].add_tag(seq, adc, samples)
+
+    return {
+        'seq_count': {
+            'value': seq,
+            'unit': 'unitless',
+            'label': 'Sequence Count'
+        },
+        'adc': {
+            'value': adc,
+            'unit': 'V',
+            'label': 'ADC'
+        },
+        'samples': {
+            'value': samples,
+            'unit': 'ADPCM (4b)',
+            'label': 'Samples'
+        },
+        'state': {
+            'value': working_recordings[wisp_id].get_state(),
+            'unit': '',
+            'label': 'State'
+        },
+        'image': {
+            'value': working_recordings[wisp_id].get_recording(),
+            'unit': 'base64 wav',
+            'label': 'Recording'
+        }
+    }
+
+def audioParserString(parsed):
+    string = ""
+
+    if (parsed['seq_count']['value'] is not None):
+        string += 'Seq: {}, '.format(parsed['seq_count']['value'])
+    if (parsed['adc']['value'] is not None):
+        string += 'ADC: {:10.4f} V, '.format(parsed['adc']['value'])
+    if (parsed['state']['value'] == 'complete'):
+        string += 'Recording available, '
+    elif (parsed['state']['value'] == 'incoming'):
+        string += 'Incoming recording, '
 
     return string.rstrip(', ')
 

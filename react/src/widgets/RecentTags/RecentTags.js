@@ -170,7 +170,7 @@ const RecentTags = (props) => {
     } = tableInstance
 
     return (
-        <Window title="Recent Tags" right={<Icon small name="close" click={props.onClose} />}>
+        <Window title="Table" right={<Icon small name="close" click={props.onClose} />}>
             <div className='recent-tags-table-container'>
                 <table {...getTableProps()}>
                     <thead>

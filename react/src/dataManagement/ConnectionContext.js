@@ -16,7 +16,7 @@ const networkSchema = yup.object({
 const settingsSchema = yup.object({
     power: yup.number('TX power must be a number').min(0, 'TX power must be between 0-60').max(60, 'Tari must be between 0-60'),
     antennas: yup.array().of(yup.number('Antenna must be a number').min(1, 'Antenna must be between 1-8').max(8, 'Antenna must be between 1-8')),
-    mode: yup.number('Mode must be a number').oneOf([0, 1, 2, 3, 4, 10], 'Mode must be between 0-4'),
+    mode: yup.number('Mode must be a number').oneOf([0, 1, 2, 3, 4, 10, 11], 'Mode must be between 0-4'),
 })
 
 const filterSchema = yup.object({
@@ -106,6 +106,10 @@ const ConnectionContext = (props) => {
             
             if (mode == 10) {
                 setFilters({ whitelist: ['CA00'], blacklist: [] });
+            }
+
+            if (mode == 11) {
+                setFilters({ whitelist: ['AD00'], blacklist: [] });
             }
 
             const success = await window.eel.startInventory(antennas, parseInt(power), parseInt(mode))()

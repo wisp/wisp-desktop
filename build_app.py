@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import sys
 
 def runCommand(command):
     return_value = os.system(command)
@@ -23,6 +24,7 @@ try:
         shutil.rmtree("dist")
 
     # Build the react UI to its build folder
+    # if len(sys.argv) > 0 and not "no-react" in sys.argv[1]:
     print(">> Building the react app")
     os.chdir("react")
     runCommand("npm run build")
@@ -35,6 +37,7 @@ try:
     shutil.move("react/build/", "python/web/")
 
     # Build the python app to the dist folder using PyInstaller
+    # if len(sys.argv) > 0 and not "no-python" in sys.argv[1]:
     print("Building the python app with PyInstaller")
     os.chdir("python")
     os.system("python3 -m eel main.py web --paths ./sllurp --windowed --onefile --name WISP_Desktop --icon ../react/public/logo.ico")

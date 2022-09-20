@@ -34,7 +34,7 @@ const ImuDemoInner = (props) => {
     let accelTag = {seen: 0, formatted: {x: 0, y: 0, z: 0}};
     for(const key of keys) {
         const thisTag = data[key];
-        if (thisTag.wispType === '0B') {
+        if (thisTag.formattedType && thisTag.formattedType === "Accelerometer") {
             if(accelTag.seen < thisTag.seen) {
                 accelTag = thisTag;
             }

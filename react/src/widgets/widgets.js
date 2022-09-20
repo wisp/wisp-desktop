@@ -23,8 +23,8 @@ const widgets = {
     //     "defaultSize": [3, 3]
     // },
     RecentTags: {
-        title: "Recent Tags",
-        component: <RecentTags/>,
+        title: "Table",
+        component: <RecentTags />,
         icon: "table_chart",
         maxSize: [null, null],
         minSize: [7, 2],
@@ -32,7 +32,7 @@ const widgets = {
     },
     Graph: {
         title: "Chart",
-        component: <Graph/>,
+        component: <Graph />,
         icon: "insert_chart",
         maxSize: [null, null],
         minSize: [7, 5],
@@ -40,35 +40,35 @@ const widgets = {
     },
     Gauge: {
         title: "Gauge",
-        component: <Gauge/>,
+        component: <Gauge />,
         icon: "speed",
         maxSize: [5, 8],
         minSize: [2, 4],
         defaultSize: [2, 4]
     },
     DataExporter: {
-        "title": "Data Exporter",
-        "component": <DataExporter/>,
-        "icon": "ios_share",
-        "maxSize": [4, null],
-        "minSize": [4, 3],
-        "defaultSize": [4, 3]
+        title: "Data Exporter",
+        component: <DataExporter />,
+        icon: "ios_share",
+        maxSize: [4, null],
+        minSize: [4, 3],
+        defaultSize: [4, 3]
     },
     ImuDemo: {
         title: "IMU Visualization",
-        component: <ImuDemo/>,
+        component: <ImuDemo />,
         icon: "view_in_ar",
         maxSize: [null, null],
         minSize: [3, 4],
         defaultSize: [4, 5]
     },
     ImgCapture: {
-        "title": "Image Capture",
-        "component": <ImgCapture/>,
-        "icon": "photo_library",
-        "maxSize": [null, null],
-        "minSize": [4, 3],
-        "defaultSize": [5, 4]
+        title: "Image Capture",
+        component: <ImgCapture />,
+        icon: "photo_library",
+        maxSize: [null, null],
+        minSize: [4, 3],
+        defaultSize: [5, 4]
     },
 }
 

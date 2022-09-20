@@ -78,7 +78,7 @@ class RFIDReader:
         )
 
         self.timeOffset = None
-        self.cameraMode = False
+        self.multiMode = False
 
         self.fac_args = dict()
         self.resetReaderConfig()
@@ -235,15 +235,15 @@ class RFIDReader:
         self.blacklist = blacklist
         return True
 
-    def changeConfig(self, antennas, tx_power, mode_identifier, camera_mode=False):
-        if camera_mode:
+    def changeConfig(self, antennas, tx_power, mode_identifier, multi_mode=False):
+        if multi_mode:
             self.fac_args["mode_identifier"] = 0
             self.fac_args["report_every_n_tags"] = 200
-            self.cameraMode = True
+            self.multiMode = True
         else:
             self.fac_args["mode_identifier"] = mode_identifier
             self.fac_args["report_every_n_tags"] = 1
-            self.cameraMode = False
+            self.multiMode = False
 
         self.fac_args["antennas"] = antennas
         self.fac_args["tx_power"] = tx_power
@@ -276,8 +276,11 @@ class RFIDReader:
                     newTag['wispId'] = epc[20:24]
                     newTag['wispType'] = epc[0:2]
 
+                    # Special cases for multi-tags
                     if (newTag['wispType'] == 'CA'):
                         newTag['wispId'] = 'CA00'
+                    if (newTag['wispType'] == 'AD'):
+                        newTag['wispId'] = 'AD00'
 
                     if ((not self.whitelist or newTag['wispId'] in self.whitelist) and newTag['wispId'] not in self.blacklist):
 
@@ -346,7 +349,7 @@ def disconnect():
 @eel.expose
 def startInventory(antennas, tx_power, mode_identifier):
     print("Eel starting inventory")
-    rfid.changeConfig(antennas, tx_power, mode_identifier, camera_mode=mode_identifier == 10)
+    rfid.changeConfig(antennas, tx_power, mode_identifier, multi_mode=(mode_identifier == 10 or mode_identifier == 11))
     return rfid.startInventory()
 
 

@@ -292,9 +292,9 @@ const GraphBody = (props) => {
 
     return (
         <div className={'graph-contain' + (graphData.length === 0 ? "" : " empty")} ref={graphContainRef}>
-            {props.randKey}
+            {/* {props.randKey} */}
             <UPlotReact
-                // key={props.randKey}
+                key={props.randKey}
                 options={graphOptions}
                 data={graphData}
                 onDelete={(/* chart: uPlot */) => console.log("Deleted from class " + props.randKey)}
