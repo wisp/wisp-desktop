@@ -1,3 +1,6 @@
+# from base64 import b64encode
+# from io import BytesIO
+
 class ADPCM:
     def __init__(self):
         self.stepSize = [
@@ -62,15 +65,4 @@ class ADPCM:
         self.prevStepSize = 0
 
 def get_b64(rec, sr=7500):
-    # Convert the recording to a WAV file
-    wav = wave.open(io.BytesIO(), 'wb')
-    wav.setnchannels(1)
-    wav.setsampwidth(2)
-    wav.setframerate(sr)
-    wav.writeframes(rec.tobytes())
-    wav.seek(0)
-
-    # Convert the WAV file to a base64 string
-    b64 = base64.b64encode(wav.read()).decode('utf-8')
-
-    return b64
+    return(",".join([str(x) for x in rec]))

@@ -1,14 +1,13 @@
 import eel
 import audioProcessing
 
-class workingRecording:
+class WorkingRecording:
     def __init__(self):
-
-        self.SAMPLES_PER_TAG = 10
+        self.SAMPLES_PER_TAG = 20
         self.BLOCK_SIZE = 200
         self.SAMPLE_RATE = 7500
+        self.ADPCM = audioProcessing.ADPCM()
 
-        
         # Refreshes before each new recording is captured
         self.rec = []
         self.block_counter = 0
@@ -33,30 +32,29 @@ class workingRecording:
                 pos = self.SAMPLES_PER_TAG * \
                     (self.BLOCK_SIZE * self.block_counter + seq) + i
                 # Add the sample to the recording, filling in zeros if pos is out of range
-                decoded = audioProcessing.ADPCM.decode(samples[i])
-                if pos < len(self.rec):
-                    self.rec[pos] = decoded
-                else:
-                    # Fill in zeros
-                    self.rec += [0] * (pos - len(self.rec))
-                    self.rec.append(decoded)
+                decoded = self.ADPCM.decode(samples[i])
+                if pos > len(self.rec):
+                    self.rec += [decoded] * (pos - len(self.rec) + 1)
 
                 self.captured_samples += 1
 
-            self.rec_b64 = audioProcessing.get_b64(self.rec, sr=self.SAMPLE_RATE)
+            # self.rec_b64 = audioProcessing.get_b64(self.rec, sr=self.SAMPLE_RATE)
+            # self.rec_b64 = self.recString
 
+        # seq of 255 indicates a completed recording
         elif seq == 255:
-            percent_captured = round((self.captured_samples / len(self.rec)) * 100)
-
-            if percent_captured > 50:
-                print('Captured {}% of recording'.format(percent_captured))
-                eel.createAlert('success', "Recording captured", 'A recording was captured with {}% of samples'.format(percent_captured), 'mic')
-                self.rec_b64 = audioProcessing.get_b64(self.rec, sr=self.SAMPLE_RATE)
+            if len(self.rec) > 100:
+                time_captured = round(len(self.rec) / self.SAMPLE_RATE, 2)
+                percent_captured = round((self.captured_samples / len(self.rec)) * 100)
+                if percent_captured > 50:
+                    print('Captured {}% of recording'.format(percent_captured))
+                    self.rec_b64 = audioProcessing.get_b64(self.rec, sr=self.SAMPLE_RATE)
+                    eel.createAlert('success', "Recording captured", 'A {} second recording was captured with {}% of samples'.format(time_captured, percent_captured), 'mic')
 
             self.clear_capture()
 
     def get_state(self):
-        if self.rec is None:
+        if len(self.rec) == 0:
             return 'complete'
         return 'incoming'
     
@@ -68,4 +66,4 @@ class workingRecording:
         self.block_counter = 0
         self.prev_seq = 0
         self.captured_samples = 0
-        audioProcessing.ADPCM.reset()
+        self.ADPCM.reset()
