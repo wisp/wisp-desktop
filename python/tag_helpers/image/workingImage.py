@@ -1,5 +1,5 @@
 from PIL import Image
-import imageProcessing
+import tag_helpers.image.imageProcessing as imageProcessing
 import eel
 
 class WorkingImage():

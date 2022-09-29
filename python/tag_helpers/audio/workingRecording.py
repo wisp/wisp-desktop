@@ -1,5 +1,5 @@
 import eel
-import audioProcessing
+import tag_helpers.audio.audioProcessing as audioProcessing
 
 class WorkingRecording:
     def __init__(self):
