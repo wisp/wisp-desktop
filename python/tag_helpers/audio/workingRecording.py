@@ -1,5 +1,5 @@
 import eel
-import audioProcessing
+import tag_helpers.audio.audioProcessing as audioProcessing
 
 class WorkingRecording:
     def __init__(self):
@@ -31,9 +31,10 @@ class WorkingRecording:
             for i in range(0, self.SAMPLES_PER_TAG):
                 pos = self.SAMPLES_PER_TAG * \
                     (self.BLOCK_SIZE * self.block_counter + seq) + i
-                # Add the sample to the recording, filling in zeros if pos is out of range
+                # Add the sample to the recording, repeating the last sample if
+                # there are missing samples
                 decoded = self.ADPCM.decode(samples[i])
-                if pos > len(self.rec):
+                if pos >= len(self.rec):
                     self.rec += [decoded] * (pos - len(self.rec) + 1)
 
                 self.captured_samples += 1

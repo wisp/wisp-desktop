@@ -9,6 +9,7 @@ import RecentTags from './RecentTags/RecentTags';
 import TemplateWidget from './_TemplateWidget/TemplateWidget';
 import DataExporter from './DataExporter/DataExporter';
 import ImgCapture from './ImgCapture/ImgCapture';
+import AudioCapture from './AudioCapture/AudioCapture';
 import Gauge from './Gauge/Gauge';
 
 // 3. Add it to the widgets object with it's properties
@@ -66,6 +67,14 @@ const widgets = {
         title: "Image Capture",
         component: <ImgCapture />,
         icon: "photo_library",
+        maxSize: [null, null],
+        minSize: [4, 3],
+        defaultSize: [5, 4]
+    },
+    AudioCapture: {
+        title: "Image Capture",
+        component: <AudioCapture />,
+        icon: "mic",
         maxSize: [null, null],
         minSize: [4, 3],
         defaultSize: [5, 4]

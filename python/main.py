@@ -383,15 +383,6 @@ def onGUIClose(a, b):
     rfid.kill_all()
     os._exit(1)
 
-# tagRate = 1000
-# fakeTag = {'PeakRSSI': -61}
-# def generateFakeTag():
-#     fakeTag["LastSeenTimestampUTC"] = time.time() * 1000000
-#     fakeTag["EPC"] = b'CA' + bytes(str(random.randint(0, 9999999999999999999999)).zfill(22), 'utf-8')
-#     Timer(1/tagRate, generateFakeTag).start()
-#     rfid.tagQueue.put_nowait(fakeTag)
-# generateFakeTag()
-
 
 if __name__ == "__main__":
     if (len(sys.argv) > 1 and sys.argv[1] == "--dev"):
