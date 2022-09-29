@@ -87,7 +87,7 @@ class RFIDReader:
         self.tagQueue = Queue(maxsize=5000)
         self.tagThread = Thread(target=self.process_tags,
                                 args=(self.tagQueue,))
-        self.tagThread.setDaemon(True)
+        self.tagThread.daemon = True
         self.tagThread.start()
 
     def forceFrontendUpdate(self):
