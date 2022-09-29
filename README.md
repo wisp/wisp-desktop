@@ -10,7 +10,7 @@ Pre-built releases of the app are available for Windows and Linux in [`/releases
 2. Install other Python dependencies with `pip install eel pyinstaller pillow`
 3. Clone this repo
 4. Install js dependencies by running `npm install` from the `/react` folder  
-5. Run `python build_app.py` (`--no-react` and `--no-python` can be used to skip parts of the build)
+5. Run `python build_app.py` (`--no-react` and `--no-python` can be used to skip parts of the build)  
 From now on, just run the script after making changes.
 
 ## Modifying the app
