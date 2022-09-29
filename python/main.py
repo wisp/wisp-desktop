@@ -305,10 +305,14 @@ class RFIDReader:
                         try:
                             tagTools = tagDict.defs.get(newTag['wispType'])
                             if tagTools:
-                                newTag['formatted'] = tagTools.get('parser')(epc)
-                                newTag['formattedString'] = tagTools.get(
-                                    'parserString')(newTag['formatted'])
                                 newTag["formattedType"] = tagTools.get('name')
+                                newTag['formatted'] = tagTools.get('parser')(epc)
+
+                                # Optionally add the human readable string of
+                                # the data
+                                if 'parserString' in tagTools:
+                                    newTag['formattedString'] = tagTools.get(
+                                        'parserString')(newTag['formatted'])
                         except Exception as e:
                             print("Failed to use formatter:", e)
                             continue
