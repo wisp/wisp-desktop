@@ -9,23 +9,23 @@ wispType ─┬┐  ┌─── wispData ───┐ ┌──┬─ wispId
 
 In order to process the tag, the app looks for a definition in `tagDict.py` with a matching `wispType`. If one is found, the defined `parser` and `parserString` are used to add formatted versions of the data to the tag report.
 
-Note: In order to maximize the transmission rate, WISPCam tags don't have a unique WISP ID. Instead, the application assigns all WISPCam tags with the ID `CA00`.
+Note: In order to maximize the transmission rate, WISP camera and audio tags don't have a unique WISP ID. Instead, the application gives these tags the same ID. Audio and camera tags become `AD00` and `CA00` respectively.
 
 ## Adding a new tag definition
-Add an entry to the `dict` object in `tagDict.py`. The key is the wispType being added. `name` should be a string. `parser` and `parserString` should be defined as lambda functions that accepts the full 24 character EPC (most of the time `wispData` is all you'll need to access).
+Add an entry to the `dict` object in `tagDict.py`. The key is the wispType being added. `name` should be a string. `parser` should be defined as a lambda function that accepts the full 24 character EPC (most of the time `wispData` is all you'll need to access). `parserString` takes is a lambda function that takes in a value from parser and makes it into a human readable string.
 
 ```python
 defs = {
     '0B': {
         'name': 'Accelerometer',
         'parser': lambda epc : accelParser(epc),
-        'parserString': lambda epc : accelParserString(epc),
+        'parserString': lambda epc : accelParserString(parsed),
     }
     ...
 }
 ```
 
-`parserString` should return a readable string representation of the data. `parser` should return an object with any number of entries, each with `value`, `unit` and `label` fields.
+`parser` should return an object with any number of entries, each with `value`, `unit` and `label` fields. `parserString` (optional) should return a readable string representation of the data.
 ```python
 def someParser(epc):
 	# Process data here
