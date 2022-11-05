@@ -3,9 +3,9 @@ import { useAlert } from 'react-alert'
 import { Connection } from './ConnectionContext';
 import _ from 'lodash'
 
-const TagData = createContext([]);
-const TagDataRecent = createContext([]);
-const TagDataModifiers = createContext([]);
+const TagData = createContext({});
+const TagDataRecent = createContext({});
+const TagDataModifiers = createContext({});
 const ReaderLogs = createContext("");
 
 const maxUpdateInterval = 100;

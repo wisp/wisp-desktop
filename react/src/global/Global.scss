@@ -193,3 +193,69 @@ h3 {
     margin-top: -0.8em;
     margin-bottom: 0.8em;
 }
+
+
+.table-container {
+    width: 100%;
+    height: 100%;
+    padding: 5px 10px;
+    box-sizing: border-box;
+
+    table {
+        text-align: left;
+        width: 100%;
+        border-collapse: collapse;
+
+        thead th {
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 15px;
+            color: $gray4;
+            padding-bottom: 10px;
+
+            .hover-sort-indicator {
+                color: $gray6;
+                display: none;
+            }
+
+            &:hover .sorted-indicator .hover-sort-indicator {
+                display: inline;
+            }
+
+            .sorted-indicator {
+                display: inline-block;
+                width: 0;
+                color: $primary;
+            }
+        }
+
+        tbody {
+            font-family: "IBM Plex Mono";
+            width: 100%;
+            tr {
+                border-top: 2px solid $gray8;
+            }
+        }
+
+        td {
+            padding: 12px;
+            padding-left: 0;
+
+            &:last-child {
+                padding-right: 6px;
+            }
+        }
+
+        .action-icons {
+            text-align: right;
+            color: $gray4;
+            visibility: hidden;
+        }
+
+        // .remove-filter {
+        //     text-align: right;
+        //     color: $gray4;
+        //     visibility: visible;
+        // }
+    }
+}

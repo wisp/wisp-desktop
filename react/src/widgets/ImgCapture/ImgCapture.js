@@ -1,9 +1,9 @@
 import Window from 'components/window/Window/Window';
 import './ImgCapture.scss'
-import React, { useEffect, useState, useContext, useRef, Fragment } from 'react';
+import React, { useState, useContext } from 'react';
 import { TagData } from 'dataManagement/EelListener';
 import Icon from 'components/Icon/Icon';
-import { Button, IconButton, Tooltip } from '@mui/material';
+import { Button } from '@mui/material';
 
 const ImgCapture = (props) => {
     return (
@@ -21,7 +21,7 @@ const ImgCaptureInner = (props) => {
     for (const tag of data) {
         if (tag.wispType === 'CA' && tag.formatted.image.value) {
             if (!images.includes(tag.formatted.image.value)) {
-                if (tag.formatted.seq_count.value == 255) {
+                if (tag.formatted.seq_count.value === 255) {
                     // This is a new, complete image, so add it to the list
                     images.unshift(tag.formatted.image.value);
                 } else {
