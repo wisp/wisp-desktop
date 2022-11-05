@@ -1,0 +1,15 @@
+@import '/src/global/Global.scss';
+
+.rate-indicator {
+    font-family: "IBM Plex Mono";
+    font-size: 50px;
+    text-align: center;
+    margin-top: -10px;
+
+    &::after {
+        content: 'tags/second';
+        display: block;
+        font-size: 15px;
+        margin-top: 8px;
+    }
+}
