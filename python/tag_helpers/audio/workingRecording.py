@@ -5,7 +5,7 @@ class WorkingRecording:
     def __init__(self):
         self.SAMPLES_PER_TAG = 20
         self.BLOCK_SIZE = 200
-        self.SAMPLE_RATE = 7500
+        self.SAMPLE_RATE = 9370
         self.ADPCM = audioProcessing.ADPCM()
 
         # Refreshes before each new recording is captured
