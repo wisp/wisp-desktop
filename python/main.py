@@ -1,4 +1,4 @@
-from sllurp.llrp import LLRPReaderClient, LLRPReaderConfig, LLRPReaderState
+from sllurp_copy.sllurp.llrp import LLRPReaderClient, LLRPReaderConfig, LLRPReaderState
 import eel
 
 import logging
@@ -6,14 +6,13 @@ import time
 import atexit
 import sys
 import os
+import socket
 from queue import Queue
 from threading import Thread, Timer
 
 import tagDict
 # import random
 # import traceback
-
-
 
 class SllurpHandler(logging.StreamHandler):
     def __init__(self):
@@ -35,9 +34,10 @@ class SllurpHandler(logging.StreamHandler):
             eel.createAlert('error', title, msg, sev.lower())
 
 
-sllurp_logger = logging.getLogger('sllurp')
+sllurp_logger = logging.getLogger('sllurp_copy')
 sllurp_logger.setLevel(logging.DEBUG)
 sllurp_logger.addHandler(SllurpHandler())
+
 
 class RFIDReader:
 
@@ -84,7 +84,7 @@ class RFIDReader:
         self.resetReaderConfig()
 
         self.isKilled = False
-        self.tagQueue = Queue(maxsize=5000)
+        self.tagQueue = Queue(maxsize=10000)
         self.tagThread = Thread(target=self.process_tags,
                                 args=(self.tagQueue,))
         self.tagThread.daemon = True
@@ -145,14 +145,14 @@ class RFIDReader:
             return False
 
         timer = 0
-        while(not self.isConnected or timer > 40):
+        while (not self.isConnected or timer > 40):
             timer += 1
-            time.sleep(0.1)
+            eel.sleep(0.1)
 
         if (self.isConnected):
             print("Reader connected")
             # Unfortunately, this is necessary to get the reader to start inventorying properly
-            time.sleep(2.25)
+            eel.sleep(2.25)
             # Don't know why just yet.
             return True
 
@@ -169,7 +169,7 @@ class RFIDReader:
             self.reader.disconnect(timeout=None)
             self.reader.join(0.1)
             # This is also necessary to get the reader to disconnect properly
-            time.sleep(0.5)
+            eel.sleep(0.5)
             return True
         except Exception as e:
             print("Disconnection failed: " + str(e))
@@ -180,7 +180,7 @@ class RFIDReader:
         if self.isConnected:
             if not self.isInventoryRunning:
                 try:
-                    self.timeOffset = None # Reset the time offset
+                    self.timeOffset = None  # Reset the time offset
                     self.reader.llrp.update_config(
                         LLRPReaderConfig(self.fac_args))
                     try:
@@ -191,9 +191,9 @@ class RFIDReader:
                         return False
                     self.reader.llrp.startInventory(force_regen_rospec=True)
                     timer = 0
-                    while(not self.isInventoryRunning or timer > 40):
+                    while (not self.isInventoryRunning or timer > 40):
                         timer += 1
-                        time.sleep(0.1)
+                        eel.sleep(0.1)
 
                     if (self.isInventoryRunning):
                         print("Inventory started")
@@ -261,7 +261,7 @@ class RFIDReader:
             self.tagQueue.put_nowait(tag)
 
     def process_tags(self, queue):
-        while(not self.isKilled):
+        while (not self.isKilled):
             # print("Queue size: " + str(queue.qsize()))
             if queue.full():
                 print("The tag processing queue is full")
@@ -271,31 +271,34 @@ class RFIDReader:
                 if (not queue.empty()):
                     tag = queue.get()
                     newTag = {}
-                    # print(newTag)
                     epc = str(tag['EPC'], 'utf-8').upper()
                     newTag['wispId'] = epc[20:24]
                     newTag['wispType'] = epc[0:2]
+                    newTag['wispHwRev'] = epc[18:20]
 
                     # Special cases for multi-tags
-                    if (newTag['wispType'] == 'CA'):
+                    if (newTag['wispType'] == 'CA' or newTag['wispType'] == 'C1'):
                         newTag['wispId'] = 'CA00'
+                        newTag['wispHwRev'] = 'NA'
                     if (newTag['wispType'] == 'AD'):
                         newTag['wispId'] = 'AD00'
+                        newTag['wispHwRev'] = 'NA'
 
                     if ((not self.whitelist or newTag['wispId'] in self.whitelist) and newTag['wispId'] not in self.blacklist):
 
                         if self.timeOffset is None:
-                            self.timeOffset = time.time() - tag['LastSeenTimestampUTC'] / 1000000
-                        
-                        newTag['seen'] = tag['LastSeenTimestampUTC'] / 1000000 + self.timeOffset
+                            self.timeOffset = time.time(
+                            ) - tag['LastSeenTimestampUTC'] / 1000000
+
+                        newTag['seen'] = tag['LastSeenTimestampUTC'] / \
+                            1000000 + self.timeOffset
 
                         newTag['seenPy'] = time.time()
 
                         newTag['epc'] = epc
                         newTag['wispData'] = epc[2:20]
-                        newTag['wispHwRev'] = epc[18:20]
                         newTag['rssi'] = tag['PeakRSSI']
-                        
+
                         # Here we create formatted versions of the data. A
                         # string version that can be rendered as text and an
                         # object version that has the data, units and a label.
@@ -306,7 +309,8 @@ class RFIDReader:
                             tagTools = tagDict.defs.get(newTag['wispType'])
                             if tagTools:
                                 newTag["formattedType"] = tagTools.get('name')
-                                newTag['formatted'] = tagTools.get('parser')(epc)
+                                newTag['formatted'] = tagTools.get(
+                                    'parser')(epc)
 
                                 # Optionally add the human readable string of
                                 # the data
@@ -314,9 +318,9 @@ class RFIDReader:
                                     newTag['formattedString'] = tagTools.get(
                                         'parserString')(newTag['formatted'])
                         except Exception as e:
-                            print("Failed to use formatter:", e)
+                            # print("Failed to use formatter:", e)
                             continue
-                        
+
                         # newTag['formatted'] = {
                         #     **newTag['formatted'],
                         #     'processing_time': {
@@ -325,7 +329,11 @@ class RFIDReader:
                         #         'label': 'Processing Time'
                         #     }
                         # }
-                        eel.acceptTag(newTag)
+                        try: 
+                            eel.acceptTag(newTag)
+                        except:
+                            eel.sleep(0.1)
+                            pass
 
             except Exception as e:
                 print("Failed to parse tag:", e)
@@ -353,7 +361,8 @@ def disconnect():
 @eel.expose
 def startInventory(antennas, tx_power, mode_identifier):
     print("Eel starting inventory")
-    rfid.changeConfig(antennas, tx_power, mode_identifier, multi_mode=(mode_identifier == 10 or mode_identifier == 11))
+    rfid.changeConfig(antennas, tx_power, mode_identifier, multi_mode=(
+        mode_identifier == 10 or mode_identifier == 11))
     return rfid.startInventory()
 
 
@@ -369,6 +378,11 @@ def changeFilters(whitelist, blacklist):
     rfid.changeFilters(whitelist, blacklist)
     return True
 
+watchdog = None
+@eel.expose
+def alive():
+    global watchdog
+    watchdog = time.time()
 
 def onScriptClose():
     eel.closeGUI()
@@ -396,6 +410,27 @@ if __name__ == "__main__":
     else:
         # Production
         print("Running in production mode:")
-        eel.init('web')
-        eel.start("index.html", host="localhost", port=3467, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
-                  "--disable-background-mode", "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+        eel.init('web')  # Give folder containing web files
+        # Check if port 3467 is available
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.bind(("localhost", 3467))
+            s.close()
+        except socket.error as e:
+            print("Port 3467 is already in use. This is likely because the app did not close properly the last time it was run.")
+            print("Please close the app and try again.")
+            raise Exception(
+                "The app is still running in the background. Wait a moment and the app should close itself.")
+
+        eel.start("index.html", host="localhost", port=3467, block=False, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
+                  "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+                
+        # Ensure we are receiving is_alive messages from the GUI
+        # watchdog = time.time() + 20 # Give the GUI 15 seconds to start
+        while True:
+            if ((watchdog is not None) and (time.time() - watchdog > 25)):
+                print("GUI is not responding... killing")
+                eel.closeGUI()
+                rfid.kill_all()
+                os._exit(1)
+            eel.sleep(1)

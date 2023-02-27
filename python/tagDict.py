@@ -17,7 +17,17 @@ defs = {
         'parser': lambda epc: accelParser(epc, type="0C"),
         'parserString': lambda parsed: accelParserString(parsed)
     },
+    '0D': {
+        'name': 'Temp/Humidity',
+        'parser': lambda epc: tempHumidityParser(epc),
+        'parserString': lambda parsed: tempHumidityParserString(parsed)
+    },
     'CA': {
+        'name': 'Camera',
+        'parser': lambda epc: cameraParser(epc),
+        'parserString': lambda parsed: cameraParserString(parsed)
+    },
+    'C1': {
         'name': 'Camera',
         'parser': lambda epc: cameraParser(epc),
         'parserString': lambda parsed: cameraParserString(parsed)
@@ -104,8 +114,9 @@ def cameraParser(epc):
     seq = int(epc[2:4], 16)
     adc = None
     pixels = None
-    # Right now, all camera tags have the same ID, but they don't have to.
-    wisp_id = "CA00"
+
+    # Right now, a camera tag's ID is just it's WISP type with two 00s
+    wisp_id = epc[0:2] + "00"
 
     if (seq == 254):
         adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
@@ -120,7 +131,7 @@ def cameraParser(epc):
 
     global working_images
     if (wisp_id not in working_images):
-        working_images[wisp_id] = WorkingImage()
+        working_images[wisp_id] = WorkingImage(version=epc[0:2])
 
     working_images[wisp_id].add_tag(seq, adc, pixels)
 
@@ -167,9 +178,11 @@ def cameraParserString(parsed):
     #     string += 'People: {}, '.format(parsed['people_found']['value'])
 
     if (parsed['state']['value'] == 'complete'):
-        string += 'Image available, '
+        string += 'Image complete, '
     elif (parsed['state']['value'] == 'incoming'):
-        string += 'Incoming image, '
+        string += 'Incoming pixels, '
+    elif (parsed['state']['value'] == 'none'):
+        string += 'No image, '
 
     return string.rstrip(', ')
 
