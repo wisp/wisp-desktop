@@ -4,8 +4,10 @@ import ChipList from 'components/ChipList/ChipList';
 const GraphModal = (props) => {
     const [graphOptions, setGraphOptions] = props.graphOptions;
 
+    const allVars = [...props.varList, ...props.defaultFields]
+
     const getSourceString = (source) => {
-        const variable = props.varList.find(item => item.value === source)
+        const variable = allVars.find(item => item.value === source)
         return variable.label + "(" + variable.unit + ")";
     }
 
@@ -16,14 +18,29 @@ const GraphModal = (props) => {
                 <FormControl fullWidth variant='filled' sx={{ width: '60%' }}>
                     <InputLabel id="select-label">Data source</InputLabel>
                     <Select
-                        id="demo-simple-select"
                         labelId="select-label"
                         value={graphOptions.ySource}
-                        onChange={(e) => { setGraphOptions({ ...graphOptions, ySource: e.target.value, ySourceStr: getSourceString(e.target.value) }) }}
+                        onChange={(e) => { 
+                            console.log("Y src: " + e.target.value)
+                            setGraphOptions({ ...graphOptions, ySource: e.target.value, ySourceStr: getSourceString(e.target.value) })
+                        }}
                     >
+                        <MenuItem value={null} disabled={true}>Computed variables</MenuItem>
                         {props.varList &&
                             props.varList.map((variable) => {
-                                return <MenuItem value={variable.value}>{variable.label} ({variable.unit})</MenuItem>
+                                if (variable.unit) {
+                                    return <MenuItem value={variable.value}>{variable.label} ({variable.unit})</MenuItem>
+                                } else {
+                                    return <MenuItem value={variable.value}>{variable.label}</MenuItem>
+                                }
+                            })
+                        }
+                        <MenuItem value={null} disabled={true}>Tag properties</MenuItem>
+                        {props.defaultFields &&
+                            props.defaultFields.map((variable) => {
+                                if (variable.unit) { // Only show numeric properties
+                                    return <MenuItem value={variable.value}>{variable.label} ({variable.unit})</MenuItem>
+                                }
                             })
                         }
                     </Select>

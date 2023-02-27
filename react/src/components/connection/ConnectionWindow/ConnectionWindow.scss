@@ -22,7 +22,7 @@
     }
 
     &.collapsed {
-        width: 32px;
+        width: 34px;
 
         & .window-content {
             display: flex;
@@ -30,7 +30,7 @@
             background-color: $gray8;
             height: 100%;
             color: $gray3;
-            width: 30px;
+            width: 34px;
             padding: 5px;
             float: right;
 

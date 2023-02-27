@@ -11,7 +11,7 @@ import Modal from 'components/Modal/Modal';
 import GraphModal from './GraphModal';
 import * as yup from 'yup';
 
-import { getVariableListFromRecentTags } from 'global/helperFunctions';
+import { getVariableListFromRecentTags, defaultFields } from 'global/helperFunctions';
 import { useAlert } from 'react-alert';
 
 import uPlot from "uplot";
@@ -91,7 +91,7 @@ const GraphInner = (props) => {
 
     return (
         <div className={'graph-body' + ' ' + props.randKey}>
-            <GraphBody data={data} options={graphOptions} randKey={props.randKey} key={props.randKey}/>
+            <GraphBody data={data} options={graphOptions} randKey={props.randKey} key={props.randKey} />
             <div className="graph-options" style={{ paddingTop: 20 }}>
                 <div className="form-group stretch">
                     {/* <Button
@@ -101,7 +101,7 @@ const GraphInner = (props) => {
                     >
                         Options
                     </Button> */}
-                    <GraphModal graphOptions={[graphOptions, setGraphOptions]} varList={varList} key={props.randKey}/>
+                    <GraphModal graphOptions={[graphOptions, setGraphOptions]} varList={varList} defaultFields={defaultFields} key={props.randKey} />
 
                     <span style={{ flexGrow: 1, display: "flex", justifyContent: 'flex-end' }}>
                         <IconButton
@@ -153,13 +153,16 @@ const processTags = _.throttle((newData, options) => {
     const y = [];
     if (newData) {
         newData.forEach(tag => {
-            if (tag.formatted && tag.formatted[options.ySource] && (tag.formatted[options.xSource] || options.timeAsX)) {
-                if (options.timeAsX) {
+            if ((tag.formatted && tag.formatted[options.ySource]) || (tag[options.ySource])) {
+                console.log("Y SRC:" + options.ySource)
+                if (defaultFields.find(item => item.value === options.ySource)) {
+                    console.log("default field")
                     x.push(tag.seen);
-                } else {
-                    x.push(tag.formatted[options.xSource].value);
+                    y.push(tag[options.ySource]);
+                } else if (tag.formatted[options.ySource]) {
+                    x.push(tag.seen);
+                    y.push(tag.formatted[options.ySource].value);
                 }
-                y.push(tag.formatted[options.ySource].value);
             }
         });
     }
@@ -170,7 +173,7 @@ const processTags = _.throttle((newData, options) => {
 
 const updateSize = _.throttle((width, height, setGraphOptions) => {
     setGraphOptions(prev => ({ ...prev, width, height }));
-}, 100);
+}, 250);
 
 const GraphBody = (props) => {
     const [graphData, setGraphData] = useState([]);
@@ -214,13 +217,13 @@ const GraphBody = (props) => {
         setGraphOptions({
             width: 400,
             height: 300,
-    
+
             legend: {
                 // show: false,
                 position: 'top',
             },
             series: [
-                {   
+                {
                     label: "Time",
                     value: (self, unix) => {
                         const time = new Date(unix * 1000);
@@ -256,7 +259,7 @@ const GraphBody = (props) => {
                 }
             ]
         })
-    } , [props.options]);
+    }, [props.options]);
 
     const options = graphValidationSchema.validateSync(props.options);
     const graphContainRef = useRef(null);
