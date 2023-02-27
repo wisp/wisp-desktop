@@ -79,25 +79,19 @@ export function getRecentDataFromArray(array) {
     return recentDataMap;
 }
 
+export const defaultFields = [
+    { label: 'Timestamp', value: 'seen', unit: 'ms' },
+    { label: 'Processing Time', value: 'processing_time', unit: 'ms' },
+    { label: 'RSSI', value: 'rssi', unit: 'dBm' },
+    { label: 'EPC', value: 'epc' },
+    { label: 'Wisp Type', value: 'wispType' },
+    { label: 'Wisp Data', value: 'wispData' },
+    { label: 'Wisp ID', value: 'wispId' },
+];
+
 export function getVariableListFromRecentTags(recentTags) {
     const variableList = [];
     if (recentTags) {
-        // for (let i = 0; i < recentTags.length; i++) {
-        //     const tag = recentTags[i];
-        //     if (tag.formatted) {
-        //         // get list of keys
-        //         console.log(tag)
-        //         const keys = Object.keys(tag.formatted);
-        //         console.log(keys)
-        //         for (let j = 0; j < keys.length; j++) {
-        //             const key = keys[j];
-        //             if (!(key in variableList)) {
-        //                 variableList.push(key);
-                        
-        //             }
-        //         }
-        //     }
-        // }
         const keys = Object.keys(recentTags);
         for (const key of keys) {
             const tag = recentTags[key];

@@ -94,11 +94,10 @@ const WindowManager = (props) => {
                     buttonLabel={(<span><Icon name="add" />&nbsp;&nbsp;Add Widget</span>)}
                 >
                     {
-                        Object.keys(widgets).map(key => {
-                            const widget = widgets[key];
+                        widgets.map(widget => {
                             return (
                                 <MenuItem onClick={() => addWindow({
-                                    x: 0, y: -1,
+                                    x: 0, y: Infinity,      // y: Infinity places it at the bottom
                                     w: widget.defaultSize[0],
                                     h: widget.defaultSize[1],
                                     element: widget.component,

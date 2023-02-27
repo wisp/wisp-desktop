@@ -105,7 +105,7 @@ const DataButtons = (props) => {
                 size='small'
                 variant="outlined"
                 color="primary"
-                disabled={!availableToClear || connectionStatus.isInventorying}
+                disabled={!availableToClear}
                 sx={{ width: "31%", mr: 1 }}
                 onClick={() => {
                     // saveData();

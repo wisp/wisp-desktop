@@ -4,7 +4,7 @@ import { useContext, useState } from 'react';
 import { TagData, TagDataRecent } from 'dataManagement/EelListener';
 import { Connection } from 'dataManagement/ConnectionContext';
 import { TextField, Chip, Autocomplete, Button, IconButton, Select, MenuItem, FormControl, InputLabel, FormControlLabel, Checkbox } from '@mui/material';
-import { getVariableListFromRecentTags } from 'global/helperFunctions';
+import { getVariableListFromRecentTags, defaultFields } from 'global/helperFunctions';
 import ChipList from 'components/ChipList/ChipList';
 import Icon from 'components/Icon/Icon';
 
@@ -16,15 +16,6 @@ const DataExporter = (props) => {
     );
 }
 // ['seen', 'epc', 'rssi', 'wispType', 'wispData', 'wispId']
-const defaultFields = [
-    { label: 'Timestamp', value: 'seen' },
-    { label: 'Processing Time', value: 'processing_time'},
-    { label: 'RSSI', value: 'rssi' },
-    { label: 'EPC', value: 'epc' },
-    { label: 'Wisp Type', value: 'wispType' },
-    { label: 'Wisp Data', value: 'wispData' },
-    { label: 'Wisp ID', value: 'wispId' },
-];
 
 const DataExporterInner = (props) => {
     const tagData = useContext(TagData).data;

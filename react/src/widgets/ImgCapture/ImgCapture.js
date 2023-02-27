@@ -1,9 +1,10 @@
 import Window from 'components/window/Window/Window';
 import './ImgCapture.scss'
-import React, { useEffect, useState, useContext, useRef, Fragment } from 'react';
+import React, { useState, useContext } from 'react';
 import { TagData } from 'dataManagement/EelListener';
 import Icon from 'components/Icon/Icon';
-import { Button, IconButton, Tooltip } from '@mui/material';
+import { Button } from '@mui/material';
+import { getRelativeTime } from 'global/helperFunctions';
 
 const ImgCapture = (props) => {
     return (
@@ -13,24 +14,55 @@ const ImgCapture = (props) => {
     );
 }
 
+const capitalize = (s) => {
+    if (typeof s !== 'string') return ''
+    return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
 const ImgCaptureInner = (props) => {
-    let images = [];
-    const [currImage, setCurrImage] = useState(0);
     const data = useContext(TagData).data;
+    let images = [{ img: null, time: null, state: null }];
+    const [currImage, setCurrImage] = useState(0);
 
     for (const tag of data) {
-        if (tag.wispType === 'CA' && tag.formatted.image.value) {
-            if (!images.includes(tag.formatted.image.value)) {
-                if (tag.formatted.seq_count.value == 255) {
-                    // This is a new, complete image, so add it to the list
-                    images.unshift(tag.formatted.image.value);
-                } else {
-                    // Update the working image if it's still in progress
-                    images[0] = tag.formatted.image.value;
-                }
+        // Ensures its a camera tag
+        if (tag.formattedType === 'Camera' && tag.formatted.image.value) {
+            // Ensures the image is not already in the list
+            // if (!images.includes(tag.formatted.image.value)) {
+            // Checks if the image is complete
+            // if (tag.formatted.state.value === 'complete') {
+            //     // This is a new, complete image, so add it to the front of the list
+            //     images.unshift({
+            //         img: tag.formatted.image.value,
+            //         time: tag.seen,
+            //         status: capitalize(tag.formatted.state.value),
+            //     });
+            // } else {
+            //     // Update the working image if it's still in progress
+            //     images[0].img = tag.formatted.image.value;
+            //     images[0].status = capitalize(tag.formatted.state.value);
+            //     images[0].time = tag.seen;
+            // }
+
+            // images with status "incoming" arrive sequentially, replacing the current image. At the end of the sequence, the image is complete.
+            // and the image should not be changed
+            images[0].state = capitalize(tag.formatted.state.value);
+            images[0].time = tag.seen;
+            images[0].img = tag.formatted.image.value;
+
+            if (tag.formatted.state.value === 'complete') {
+                images.unshift({
+                    img: null,
+                    time: null,
+                    state: null,
+                });
             }
         }
     }
+
+    // remove duplicates and null images
+    var renderedImages = [...new Set(images)];
+    renderedImages = renderedImages.filter((image) => image.img !== null);
 
     return (
         <div className='ImageCapture'>
@@ -46,22 +78,34 @@ const ImgCaptureInner = (props) => {
                 >
                     <Icon small name='arrow_back_ios' />
                 </Button>
-                {
-                    images.length > 0 ?
-                        (<div style={{ flexGrow: '1' }}>
-                            {/* <h2>People Found: {counts[currImage]}</h2> */}
-                            <img src={"data:image/png;base64," + images[currImage]} />
-                        </div>)
-                        :
-                        (<div className='no-image'>
-                            <p>No image captured</p>
-                        </div>)
-                }
+                <div className='img-contain'>
+                    {
+                        renderedImages[currImage] && renderedImages[currImage].img ?
+                            (<div style={{ flexGrow: '1' }}>
+                                {/* <h2>People Found: {counts[currImage]}</h2> */}
+                                <img src={"data:image/png;base64," + renderedImages[currImage].img} />
+                            </div>)
+                            :
+                            (<div className='no-image'>
+                                <p>No image captured</p>
+                            </div>)
+                    }
+                    <div className='status-group' style={{marginTop: 20}}>
+                        <div className='status'>
+                            <div className='label'>Captured</div>
+                            <div className='value'>{renderedImages[currImage] ? new Date(renderedImages[currImage].time * 1000).toLocaleString() : ''}</div>
+                        </div>
+                        <div className='status'>
+                            <div className='label'>Status</div>
+                            <div className='value'>{renderedImages[currImage] ? renderedImages[currImage].state : ''}</div>
+                        </div>
+                    </div>
+                </div>
                 <Button
                     variant='outlined'
                     color='primary'
                     sx={{ height: '150px', minWidth: '0', width: '0' }}
-                    disabled={currImage >= images.length - 1}
+                    disabled={currImage >= renderedImages.length - 1}
                     onClick={() => {
                         setCurrImage(currImage + 1);
                     }}

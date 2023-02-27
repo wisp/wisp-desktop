@@ -34,6 +34,7 @@ const GaugeInner = (props) => {
     const tagDataRecent = useContext(TagDataRecent).data;
     const varList = getVariableListFromRecentTags(tagDataRecent);
     const gaugeRef = useRef(null);
+    const gaugeLabelRef = useRef(null);
 
     const [dataSource, setDataSource] = useState(null);
     const [range, setRange] = useState([0, 100]);
@@ -66,6 +67,7 @@ const GaugeInner = (props) => {
         const myObserver = new ResizeObserver(entries => {
             entries.forEach(entry => {
                 setSize(entry.contentRect.height);
+                gaugeLabelRef.current.style.fontSize = `${Math.round(entry.contentRect.height / 4.5)}px`;
             });
         });
         myObserver.observe(gaugeRef.current);
@@ -104,7 +106,7 @@ const GaugeInner = (props) => {
                         }
                     }}
                 />
-                <div className='gauge-value'>{Math.round(value * 10) / 10}</div>
+                <div className='gauge-value' ref={gaugeLabelRef}>{Math.round(value * 10) / 10}</div>
             </div>
             <div style={{ width: '100%', margin: 'auto' }}>
                 <FormControl fullWidth variant='filled'>

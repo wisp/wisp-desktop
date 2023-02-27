@@ -171,7 +171,7 @@ const RecentTags = (props) => {
 
     return (
         <Window title="Table" right={<Icon small name="close" click={props.onClose} />}>
-            <div className='recent-tags-table-container'>
+            <div className='table-container RecentTags'>
                 <table {...getTableProps()}>
                     <thead>
                         {// Loop over the header rows

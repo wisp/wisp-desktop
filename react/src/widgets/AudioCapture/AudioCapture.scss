@@ -1,0 +1,13 @@
+@import "/src/global/Global.scss";
+
+// center the image in the container, and scale it to fit the container
+
+.AudioCapture {
+    width: 100%;
+    height: 100%;
+
+    audio {
+        min-width: 100%;
+        margin-bottom: -4px;
+    }
+}

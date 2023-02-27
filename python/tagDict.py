@@ -1,5 +1,5 @@
 from tag_helpers.image.workingImage import WorkingImage
-# from tag_helpers.audio.workingRecording import WorkingRecording
+from tag_helpers.audio.workingRecording import WorkingRecording
 
 defs = {
     'XX': {
@@ -17,16 +17,26 @@ defs = {
         'parser': lambda epc: accelParser(epc, type="0C"),
         'parserString': lambda parsed: accelParserString(parsed)
     },
+    '0D': {
+        'name': 'Temp/Humidity',
+        'parser': lambda epc: tempHumidityParser(epc),
+        'parserString': lambda parsed: tempHumidityParserString(parsed)
+    },
     'CA': {
         'name': 'Camera',
         'parser': lambda epc: cameraParser(epc),
         'parserString': lambda parsed: cameraParserString(parsed)
     },
-    # 'AD': {
-    #     'name': 'Audio',
-    #     'parser': lambda epc: audioParser(epc),
-    #     'parserString': lambda parsed: audioParserString(parsed)
-    # },
+    'C1': {
+        'name': 'Camera',
+        'parser': lambda epc: cameraParser(epc),
+        'parserString': lambda parsed: cameraParserString(parsed)
+    },
+    'AD': {
+        'name': 'Audio',
+        'parser': lambda epc: audioParser(epc),
+        'parserString': lambda parsed: audioParserString(parsed)
+    },
     '0F': {
         'name': 'Temperature',
         'parser': lambda epc: tempParser(epc),
@@ -57,10 +67,12 @@ def accelParser(epc, type="0B"):
     def scale(raw):
         value = int(raw, 16)
         if type == "0C":
-            value = ((100.0 * value / 256.0) - 50)  # Convert to value between -50 and 50
+            # Convert to value between -50 and 50
+            value = ((100.0 * value / 256.0) - 50)
             return 0.392 * value
         else:
-            value = ((100.0 * value / 1024.0) - 50)  # Convert to value between -50 and 50
+            # Convert to value between -50 and 50
+            value = ((100.0 * value / 1024.0) - 50)
             return 1.13 * value
 
     x = scale(epc[6:10])
@@ -95,12 +107,16 @@ def accelParserString(parsed):
 
 ### Camera Tag ###
 
-working_images = {} # This keeps track of all the images that have been started
+working_images = {}  # This keeps track of all the images that have been started
+
+
 def cameraParser(epc):
     seq = int(epc[2:4], 16)
     adc = None
     pixels = None
-    wisp_id = "CA00" # Right now, all camera tags have the same ID, but they don't have to.
+
+    # Right now, a camera tag's ID is just it's WISP type with two 00s
+    wisp_id = epc[0:2] + "00"
 
     if (seq == 254):
         adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
@@ -115,7 +131,7 @@ def cameraParser(epc):
 
     global working_images
     if (wisp_id not in working_images):
-        working_images[wisp_id] = WorkingImage()
+        working_images[wisp_id] = WorkingImage(version=epc[0:2])
 
     working_images[wisp_id].add_tag(seq, adc, pixels)
 
@@ -135,11 +151,6 @@ def cameraParser(epc):
             'unit': 'grayscale (256)',
             'label': 'Pixels'
         },
-        # 'people_found': {
-        #     'value': working_image.get_person_count(),
-        #     'unit': 'people',
-        #     'label': 'People Found'
-        # },
         'state': {
             'value': working_images[wisp_id].get_state(),
             'unit': '',
@@ -151,6 +162,7 @@ def cameraParser(epc):
             'label': 'Image'
         }
     }
+
 
 def cameraParserString(parsed):
     # Format ADC: ##.## V, Seq: ###
@@ -166,80 +178,86 @@ def cameraParserString(parsed):
     #     string += 'People: {}, '.format(parsed['people_found']['value'])
 
     if (parsed['state']['value'] == 'complete'):
-        string += 'Image available, '
+        string += 'Image complete, '
     elif (parsed['state']['value'] == 'incoming'):
-        string += 'Incoming image, '
+        string += 'Incoming pixels, '
+    elif (parsed['state']['value'] == 'none'):
+        string += 'No image, '
 
     return string.rstrip(', ')
 
 
-# ### Audio Tag ###
+### Audio Tag ###
 
-# working_recordings = {} # This keeps track of all the recordings that have been started
-# def audioParser(epc):
-#     seq = int(epc[2:4], 16)
-#     adc = None
-#     samples = None
-#     wisp_id = "AD00" # Right now, all audio tags have the same ID, but they don't have to.
+working_recordings = {}  # This keeps track of all the recordings that have been started
 
-#     if (seq == 254):
-#         adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
-#     else:
-#         sample_string = epc[4:24]
-#         samples = []
 
-#         # Each sample is 4 bits
-#         while len(sample_string) > 0:
-#             samples.append(int(sample_string[:1], 16))
-#             sample_string = sample_string[1:]
+def audioParser(epc):
+    seq = int(epc[2:4], 16)
+    adc = None
+    samples = None
+    # Right now, all audio tags have the same ID, but they don't have to.
+    wisp_id = "AD00"
 
-#     global working_recordings
-#     if (wisp_id not in working_recordings):
-#         working_recordings[wisp_id] = WorkingRecording()
+    if (seq == 254):
+        adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
+    else:
+        sample_string = epc[4:24]
+        samples = []
 
-#     working_recordings[wisp_id].add_tag(seq, adc, samples)
+        # Each sample is 4 bits
+        while len(sample_string) > 0:
+            samples.append(int(sample_string[:1], 16))
+            sample_string = sample_string[1:]
 
-#     return {
-#         'seq_count': {
-#             'value': seq,
-#             'unit': 'unitless',
-#             'label': 'Sequence Count'
-#         },
-#         'adc': {
-#             'value': adc,
-#             'unit': 'V',
-#             'label': 'ADC'
-#         },
-#         'samples': {
-#             'value': samples,
-#             'unit': 'ADPCM (4b)',
-#             'label': 'Samples'
-#         },
-#         'state': {
-#             'value': working_recordings[wisp_id].get_state(),
-#             'unit': '',
-#             'label': 'State'
-#         },
-#         'image': {
-#             'value': working_recordings[wisp_id].get_recording(),
-#             'unit': 'base64 wav',
-#             'label': 'Recording'
-#         }
-#     }
+    global working_recordings
+    if (wisp_id not in working_recordings):
+        working_recordings[wisp_id] = WorkingRecording()
 
-# def audioParserString(parsed):
-#     string = ""
+    working_recordings[wisp_id].add_tag(seq, adc, samples)
 
-#     if (parsed['seq_count']['value'] is not None):
-#         string += 'Seq: {}, '.format(parsed['seq_count']['value'])
-#     if (parsed['adc']['value'] is not None):
-#         string += 'ADC: {:10.4f} V, '.format(parsed['adc']['value'])
-#     if (parsed['state']['value'] == 'complete'):
-#         string += 'Recording available, '
-#     elif (parsed['state']['value'] == 'incoming'):
-#         string += 'Incoming recording, '
+    return {
+        'seq_count': {
+            'value': seq,
+            'unit': 'unitless',
+            'label': 'Sequence Count'
+        },
+        'adc': {
+            'value': adc,
+            'unit': 'V',
+            'label': 'ADC'
+        },
+        'samples': {
+            'value': samples,
+            'unit': 'ADPCM (4b)',
+            'label': 'Samples'
+        },
+        'state': {
+            'value': working_recordings[wisp_id].get_state(),
+            'unit': '',
+            'label': 'State'
+        },
+        'recording': {
+            'value': working_recordings[wisp_id].get_recording(),
+            'unit': 'base64 wav',
+            'label': 'Recording'
+        }
+    }
 
-#     return string.rstrip(', ')
+
+def audioParserString(parsed):
+    string = ""
+
+    if (parsed['seq_count']['value'] is not None):
+        string += 'Seq: {}, '.format(parsed['seq_count']['value'])
+    if (parsed['adc']['value'] is not None):
+        string += 'ADC: {:10.4f} V, '.format(parsed['adc']['value'])
+    if (parsed['state']['value'] == 'complete'):
+        string += 'Recording available, '
+    elif (parsed['state']['value'] == 'incoming'):
+        string += 'Incoming recording, '
+
+    return string.rstrip(', ')
 
 
 ### Temperature Tag ###
@@ -247,10 +265,6 @@ def cameraParserString(parsed):
 def tempParser(epc):
     def scale(raw):
         value = int(raw, 16)
-        # if value < 0 or value > 1024:
-        #     return ((value - 673) * 423) / 1024
-        # else:
-        #     return 0
         return ((value - 673) * 423) / 1024
 
     temp = scale(epc[3:6])
@@ -262,5 +276,35 @@ def tempParser(epc):
         }
     }
 
+
 def tempParserString(parsed):
     return '{:.2f} C'.format(parsed['temp']['value'])
+
+
+### Temperature Humidity Tag ###
+
+def tempHumidityParser(epc):
+    tLsb = int(epc[2:4], 16)
+    tMsb = int(epc[4:6], 16)
+    hLsb = int(epc[6:8], 16)
+    hMsb = int(epc[8:10], 16)
+    tRaw = (tMsb << 8) | tLsb
+    hRaw = (hMsb << 8) | hLsb
+    temp = (tRaw / 2**16) * 165 - 40
+    humidity = (hRaw / 2**16) * 100
+
+    return {
+        'temp': {
+            'value': temp,
+            'unit': 'C',
+            'label': 'Temperature'
+        },
+        'humidity': {
+            'value': humidity,
+            'unit': '%',
+            'label': 'Humidity'
+        }
+    }
+
+def tempHumidityParserString(parsed):
+    return '{:.2f} C, {:.2f} %'.format(parsed['temp']['value'], parsed['humidity']['value'])
