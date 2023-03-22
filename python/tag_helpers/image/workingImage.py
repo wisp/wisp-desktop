@@ -3,18 +3,11 @@ import tag_helpers.image.imageProcessing as imageProcessing
 import eel
 
 class WorkingImage():
-    def __init__(self, version="CA"):
+    def __init__(self):
         print('Initializing image class')
 
-        if version == "CA":
-            self.WIDTH = 175
-            self.HEIGHT = 144
-        elif version == "C1":
-            self.WIDTH = 162
-            self.HEIGHT = 122
-        else:
-            print('Invalid camera version: {}'.format(version))
-            return
+        self.WIDTH = 162
+        self.HEIGHT = 122
         
         self.BLOCK_SIZE = 200
         self.PIX_PER_TAG = 10
