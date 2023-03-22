@@ -8,8 +8,8 @@ import * as yup from 'yup';
 import { useAlert } from 'react-alert';
 
 const validation = yup.object({
-    whitelist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9]{4}$', 'Invalid WISP ID')),
-    blacklist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9]{4}$', 'Invalid WISP ID')),
+    whitelist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9Xx]{4}$', 'Invalid WISP ID')),
+    blacklist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9Xx]{4}$', 'Invalid WISP ID')),
 });
 
 const Filter = (props) => {
@@ -33,7 +33,7 @@ const Filter = (props) => {
         <div className="filter">
             <h2>Filtering</h2>
             <h3>Tags are filtered by their WISP IDs&nbsp;&nbsp;
-                <Tooltip title="The last 4 characters of a tag's EPC is its WISP ID" placement="right">
+                <Tooltip title="The last 4 characters of a tag's EPC is its WISP ID. 'X' can be used as a wildcard 4-bit character." placement="right">
                     <span><Icon name="info" small /></span>
                 </Tooltip>
             </h3>

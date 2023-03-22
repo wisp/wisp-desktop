@@ -16,12 +16,12 @@ const networkSchema = yup.object({
 const settingsSchema = yup.object({
     power: yup.number('TX power must be a number').min(0, 'TX power must be between 0-60').max(60, 'Tari must be between 0-60'),
     antennas: yup.array().of(yup.number('Antenna must be a number').min(1, 'Antenna must be between 1-8').max(8, 'Antenna must be between 1-8')),
-    mode: yup.number('Mode must be a number').oneOf([0, 1, 2, 3, 4, 10, 11], 'Mode must be between 0-4'),
+    mode: yup.number('Mode must be a number').oneOf([0, 1, 2, 3, 4, 10, 11], 'Invalid mode'),
 })
 
 const filterSchema = yup.object({
-    whitelist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9]{4}$', 'Invalid WISP ID')),
-    blacklist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9]{4}$', 'Invalid WISP ID')),
+    whitelist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9Xx]{4}$', 'Invalid WISP ID')),
+    blacklist: yup.array().of(yup.string().uppercase().length(4, 'WISP ID must be 4 characters long').matches('^[A-Fa-f0-9Xx]{4}$', 'Invalid WISP ID')),
 })
 
 const ConnectionContext = (props) => {
@@ -46,7 +46,7 @@ const ConnectionContext = (props) => {
     });
 
     const [params, setParams] = useState({
-        host: '',
+        host: 'speedway-00-05-ea.local',
         port: 5084,
         showConsole: false,
         power: 60,
@@ -105,11 +105,11 @@ const ConnectionContext = (props) => {
         settingsSchema.validate({ antennas, power, mode }).then(async () => {
             
             if (mode == 10) {
-                setFilters({ whitelist: ['CA00'], blacklist: [] });
+                setFilters({ whitelist: ['CAXX'], blacklist: [] });
             }
 
             if (mode == 11) {
-                setFilters({ whitelist: ['AD00'], blacklist: [] });
+                setFilters({ whitelist: ['ADXX'], blacklist: [] });
             }
 
             const success = await window.eel.startInventory(antennas, parseInt(power), parseInt(mode))()
