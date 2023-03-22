@@ -27,11 +27,6 @@ defs = {
         'parser': lambda epc: cameraParser(epc),
         'parserString': lambda parsed: cameraParserString(parsed)
     },
-    'C1': {
-        'name': 'Camera',
-        'parser': lambda epc: cameraParser(epc),
-        'parserString': lambda parsed: cameraParserString(parsed)
-    },
     'AD': {
         'name': 'Audio',
         'parser': lambda epc: audioParser(epc),
@@ -115,8 +110,8 @@ def cameraParser(epc):
     adc = None
     pixels = None
 
-    # Right now, a camera tag's ID is just it's WISP type with two 00s
-    wisp_id = epc[0:2] + "00"
+    # All camera tags have the same ID for the time being
+    wisp_id = 'CA00'
 
     if (seq == 254):
         adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
@@ -131,7 +126,7 @@ def cameraParser(epc):
 
     global working_images
     if (wisp_id not in working_images):
-        working_images[wisp_id] = WorkingImage(version=epc[0:2])
+        working_images[wisp_id] = WorkingImage()
 
     working_images[wisp_id].add_tag(seq, adc, pixels)
 
@@ -196,8 +191,9 @@ def audioParser(epc):
     seq = int(epc[2:4], 16)
     adc = None
     samples = None
-    # Right now, all audio tags have the same ID, but they don't have to.
-    wisp_id = "AD00"
+
+    # All audio tags have the same ID for the time being
+    wisp_id = 'AD00'
 
     if (seq == 254):
         adc = int(epc[4:8], 16) * .0041544477  # Based on 4.25 V max ADC range
@@ -205,10 +201,10 @@ def audioParser(epc):
         sample_string = epc[4:24]
         samples = []
 
-        # Each sample is 4 bits
+        # Each sample is 8 bits
         while len(sample_string) > 0:
-            samples.append(int(sample_string[:1], 16))
-            sample_string = sample_string[1:]
+            samples.append(int(sample_string[:2], 16))
+            sample_string = sample_string[2:]
 
     global working_recordings
     if (wisp_id not in working_recordings):
@@ -231,6 +227,11 @@ def audioParser(epc):
             'value': samples,
             'unit': 'ADPCM (4b)',
             'label': 'Samples'
+        },
+        'progress': {
+            'value': working_recordings[wisp_id].get_progress(),
+            'unit': '%',
+            'label': 'Progress'
         },
         'state': {
             'value': working_recordings[wisp_id].get_state(),
