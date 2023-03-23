@@ -1,0 +1,22 @@
+[
+    {
+        "EPC": "A00000000000000000000001",
+        "LastSeenTimestampUTC": 1590000001,
+        "PeakRSSI": -50
+    },
+    {
+        "EPC": "A00000000000000000000002",
+        "LastSeenTimestampUTC": 1590000002,
+        "PeakRSSI": -49
+    },
+    {
+        "EPC": "A00000000000000000000003",
+        "LastSeenTimestampUTC": 1590000003,
+        "PeakRSSI": -48
+    },
+    {
+        "EPC": "A00000000000000000000004",
+        "LastSeenTimestampUTC": 1590000004,
+        "PeakRSSI": -47
+    }
+]
