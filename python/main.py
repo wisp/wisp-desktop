@@ -11,8 +11,6 @@ from queue import Queue
 from threading import Thread, Timer
 
 import tagDict
-# import random
-# import traceback
 
 class SllurpHandler(logging.StreamHandler):
     def __init__(self):
@@ -163,8 +161,7 @@ class RFIDReader:
         print("Running reader.disconnect")
         if not self.isConnected:
             print("Reader already disconnected")
-            return False
-
+            return True
         try:
             self.reader.disconnect(timeout=None)
             self.reader.join(0.1)
@@ -173,7 +170,7 @@ class RFIDReader:
             return True
         except Exception as e:
             print("Disconnection failed: " + str(e))
-            return False
+            return True
 
     def startInventory(self):
         print("Running reader.startInventory")
@@ -256,149 +253,152 @@ class RFIDReader:
         self.disconnect()
 
     def tag_seen(self, reader, tags):
-        reversed_tags = tags[::-1]
-        for tag in reversed_tags:
-            self.tagQueue.put_nowait(tag)
+        self.tagQueue.put_nowait(tags)
 
     def process_tags(self, queue):
         while (not self.isKilled):
-            # print("Queue size: " + str(queue.qsize()))
-            if queue.full():
-                print("The tag processing queue is full")
+            if (not queue.empty()):
+                receivedTags = queue.get()
+                reversedTags = receivedTags[::-1]
 
-            try:
-                # start_time = time.perf_counter()
-                if (not queue.empty()):
-                    tag = queue.get()
-                    newTag = {}
-                    epc = str(tag['EPC'], 'utf-8').upper()
-                    newTag['wispId'] = epc[20:24]
-                    newTag['wispType'] = epc[0:2]
-                    newTag['wispHwRev'] = epc[18:20]
+                for tag in reversedTags:
+                    try:                    
+                        newTag = {}
+                        if type(tag['EPC']) is not str:
+                            epc = str(tag['EPC'], 'utf-8').upper()
+                        else:
+                            epc = tag['EPC'].upper()
+                        newTag['wispId'] = epc[20:24]
+                        newTag['wispType'] = epc[0:2]
+                        newTag['wispHwRev'] = epc[18:20]
 
-                    # Special cases for multi-tags
-                    if (newTag['wispType'] == 'CA' or newTag['wispType'] == 'C1'):
-                        newTag['wispId'] = 'CA00'
-                        newTag['wispHwRev'] = 'NA'
-                    if (newTag['wispType'] == 'AD'):
-                        newTag['wispId'] = 'AD00'
-                        newTag['wispHwRev'] = 'NA'
+                        # Special cases for multi-tags
+                        if (newTag['wispType'] == 'CA' or newTag['wispType'] == 'C1'):
+                            newTag['wispId'] = 'CA00'
+                            # newTag['wispId'] = 'CA' + epc[22:24]
+                            newTag['wispHwRev'] = 'NA'
+                        if (newTag['wispType'] == 'AD'):
+                            newTag['wispId'] = 'AD00'
+                            # newTag['wispId'] = 'AD' + epc[22:24]
+                            newTag['wispHwRev'] = 'NA'
 
-                    if ((not self.whitelist or newTag['wispId'] in self.whitelist) and newTag['wispId'] not in self.blacklist):
+                        def check_list(wispId, checkList):
+                            for listItem in checkList:
+                                listItemChars = list(listItem)
+                                wispIdChars = list(wispId)
+                                for i in range(4):
+                                    if (listItemChars[i] == 'X' or listItemChars[i] == wispIdChars[i]):
+                                        if (i == 3):
+                                            return True
+                                    else:
+                                        break
+                            return False
 
-                        if self.timeOffset is None:
-                            self.timeOffset = time.time(
-                            ) - tag['LastSeenTimestampUTC'] / 1000000
+                        if ((not self.whitelist or check_list(newTag['wispId'], self.whitelist)) and (not check_list(newTag['wispId'], self.blacklist))):
 
-                        newTag['seen'] = tag['LastSeenTimestampUTC'] / \
-                            1000000 + self.timeOffset
+                            if self.timeOffset is None:
+                                self.timeOffset = time.time(
+                                ) - tag['LastSeenTimestampUTC'] / 1000000
 
-                        newTag['seenPy'] = time.time()
+                            newTag['seen'] = tag['LastSeenTimestampUTC'] / \
+                                1000000 + self.timeOffset
 
-                        newTag['epc'] = epc
-                        newTag['wispData'] = epc[2:20]
-                        newTag['rssi'] = tag['PeakRSSI']
+                            newTag['seenPy'] = time.time()
 
-                        # Here we create formatted versions of the data. A
-                        # string version that can be rendered as text and an
-                        # object version that has the data, units and a label.
+                            newTag['epc'] = epc
+                            newTag['wispData'] = epc[2:20]
+                            newTag['rssi'] = tag['PeakRSSI']
 
-                        # The formatter depends on the type of tag, so check
-                        # tags.py for the different types.
-                        try:
-                            tagTools = tagDict.defs.get(newTag['wispType'])
-                            if tagTools:
-                                newTag["formattedType"] = tagTools.get('name')
-                                newTag['formatted'] = tagTools.get(
-                                    'parser')(epc)
+                            # Here we create formatted versions of the data. A
+                            # string version that can be rendered as text and an
+                            # object version that has the data, units and a label.
 
-                                # Optionally add the human readable string of
-                                # the data
-                                if 'parserString' in tagTools:
-                                    newTag['formattedString'] = tagTools.get(
-                                        'parserString')(newTag['formatted'])
-                        except Exception as e:
-                            # print("Failed to use formatter:", e)
-                            continue
+                            # The formatter depends on the type of tag, so check
+                            # tags.py for the different types.
+                            try:
+                                tagTools = tagDict.defs.get(newTag['wispType'])
+                                if tagTools:
+                                    newTag["formattedType"] = tagTools.get('name')
+                                    newTag['formatted'] = tagTools.get(
+                                        'parser')(epc)
 
-                        # newTag['formatted'] = {
-                        #     **newTag['formatted'],
-                        #     'processing_time': {
-                        #         'value': time.perf_counter() - start_time,
-                        #         'units': 'seconds',
-                        #         'label': 'Processing Time'
-                        #     }
-                        # }
-                        try: 
-                            eel.acceptTag(newTag)
-                        except:
-                            eel.sleep(0.1)
-                            pass
+                                    # Optionally add the human readable string of
+                                    # the data
+                                    if 'parserString' in tagTools:
+                                        newTag['formattedString'] = tagTools.get(
+                                            'parserString')(newTag['formatted'])
+                            except Exception as e:
+                                print("Failed to use formatter:", e)
+                            
+                            try:
+                                eel.acceptTag(newTag)
+                            except:
+                                eel.sleep(0.01)
+                                pass
 
-            except Exception as e:
-                print("Failed to parse tag:", e)
-                pass
+                    except Exception as e:
+                        print("Failed to parse tag:", e)
+                        pass
 
         print("Tag processing thread killed")
         os._exit(0)
 
-
-rfid = RFIDReader()
-
-
-@eel.expose
-def connect(host, port):
-    print("Eel connecting")
-    return rfid.connect(host, port)
-
-
-@eel.expose
-def disconnect():
-    print("Eel disconnecting")
-    return rfid.disconnect()
-
-
-@eel.expose
-def startInventory(antennas, tx_power, mode_identifier):
-    print("Eel starting inventory")
-    rfid.changeConfig(antennas, tx_power, mode_identifier, multi_mode=(
-        mode_identifier == 10 or mode_identifier == 11))
-    return rfid.startInventory()
-
-
-@eel.expose
-def stopInventory():
-    print("Eel stopping inventory")
-    return rfid.stopInventory()
-
-
-@eel.expose
-def changeFilters(whitelist, blacklist):
-    print("Eel updating filters")
-    rfid.changeFilters(whitelist, blacklist)
-    return True
-
-watchdog = None
-@eel.expose
-def alive():
-    global watchdog
-    watchdog = time.time()
-
-def onScriptClose():
-    eel.closeGUI()
-    rfid.kill_all()
-
-
-atexit.register(onScriptClose)
-
-
-def onGUIClose(a, b):
-    print("GUI closed... killing")
-    rfid.kill_all()
-    os._exit(1)
-
-
 if __name__ == "__main__":
+
+    rfid = RFIDReader()
+
+
+    @eel.expose
+    def connect(host, port):
+        print("Eel connecting")
+        return rfid.connect(host, port)
+
+
+    @eel.expose
+    def disconnect():
+        print("Eel disconnecting")
+        return rfid.disconnect()
+
+
+    @eel.expose
+    def startInventory(antennas, tx_power, mode_identifier):
+        print("Eel starting inventory")
+        rfid.changeConfig(antennas, tx_power, mode_identifier, multi_mode=(
+            mode_identifier == 10 or mode_identifier == 11))
+        return rfid.startInventory()
+
+
+    @eel.expose
+    def stopInventory():
+        print("Eel stopping inventory")
+        return rfid.stopInventory()
+
+
+    @eel.expose
+    def changeFilters(whitelist, blacklist):
+        print("Eel updating filters")
+        rfid.changeFilters(whitelist, blacklist)
+        return True
+
+    watchdog = None
+    @eel.expose
+    def alive():
+        global watchdog
+        watchdog = time.time()
+
+    def onScriptClose():
+        eel.closeGUI()
+        rfid.kill_all()
+
+
+    atexit.register(onScriptClose)
+
+
+    def onGUIClose(a, b):
+        print("GUI closed... killing")
+        rfid.kill_all()
+        os._exit(1)
+
     if (len(sys.argv) > 1 and sys.argv[1] == "--dev"):
         # Development
         print("Running in development mode:")
@@ -424,7 +424,6 @@ if __name__ == "__main__":
 
         eel.start("index.html", host="localhost", port=3467, block=False, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
                   "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
-                
         # Ensure we are receiving is_alive messages from the GUI
         # watchdog = time.time() + 20 # Give the GUI 15 seconds to start
         while True:
