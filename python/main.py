@@ -48,6 +48,7 @@ class RFIDReader:
 
         self.FAC_ARGS_DEFAULT = dict(
             report_every_n_tags=1,
+            report_timeout_ms=0,
             start_inventory=False,
             impinj_search_mode=2,
             tag_content_selector={
@@ -235,11 +236,13 @@ class RFIDReader:
     def changeConfig(self, antennas, tx_power, mode_identifier, multi_mode=False):
         if multi_mode:
             self.fac_args["mode_identifier"] = 0
-            self.fac_args["report_every_n_tags"] = 200
+            self.fac_args["report_every_n_tags"] = 2000
+            self.fac_args["report_timeout_ms"] = 500
             self.multiMode = True
         else:
             self.fac_args["mode_identifier"] = mode_identifier
             self.fac_args["report_every_n_tags"] = 1
+            self.fac_args["report_timeout_ms"] = 0
             self.multiMode = False
 
         self.fac_args["antennas"] = antennas
