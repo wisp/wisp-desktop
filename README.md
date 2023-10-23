@@ -1,5 +1,7 @@
 # WISP Desktop
 
+Branch for Ines!
+
 A GUI desktop interface for WISP tags, using [sllurp2](https://github.com/fviard/sllurp/tree/fviard-develop-v2/sllurp) to interface an RFID reader, and [react](https://github.com/facebook/react) and [eel](https://github.com/ChrisKnott/Eel) for the UI.
 
 ## Installing the app
