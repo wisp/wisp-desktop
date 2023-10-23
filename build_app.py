@@ -44,6 +44,11 @@ try:
         shutil.move("react/build/", "python/web/")
 
     if not args.no_python:
+        # Remove the old dist folder
+        print(">> Removing the old dist folder")
+        if os.path.exists("python/dist"):
+            shutil.rmtree("python/dist")
+            
         # Build the python app to the dist folder using PyInstaller
         print("Building the python app with PyInstaller")
         os.chdir("python")
@@ -52,7 +57,7 @@ try:
 
         # Moving the built app into the dist folder
         print(">> Moving the built app into the dist folder")
-        shutil.copytree("python/dist", "./")
+        shutil.copytree("python/dist", "dist")
 
     if args.usb:
         # Copy the dist folder to a USB drive
