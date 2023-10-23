@@ -37,7 +37,28 @@ defs = {
         'parser': lambda epc: tempParser(epc),
         'parserString': lambda parsed: tempParserString(parsed)
     },
+    'F1': {
+        'name': 'FSR',
+        'parser': lambda epc: fsrParser(epc),
+        'parserString': lambda parsed: fsrParserString(parsed)
+    }
 }
+
+### Force Sensitive Resistor Tag ###
+def fsrParser(epc):
+    raw = int(epc[2:4], 16) # Turns the hex of the second byte into an integer
+    voltage = raw / 255 * 3.3 # Converts the integer to a voltage
+
+    return {
+        'fsr': {
+            'value': voltage,
+            'unit': 'V',
+            'label': 'Force'
+        }
+    }
+
+def fsrParserString(parsed):
+    return '{:.2f} V'.format(parsed['fsr']['value'])
 
 
 ### Acknowledgement Tag ###
