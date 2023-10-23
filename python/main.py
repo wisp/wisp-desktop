@@ -84,6 +84,7 @@ class RFIDReader:
 
         self.isKilled = False
         self.tagQueue = Queue(maxsize=10000)
+        self.tagThreadWatchdog = None
         self.tagThread = Thread(target=self.process_tags,
                                 args=(self.tagQueue,))
         self.tagThread.daemon = True
@@ -343,6 +344,12 @@ class RFIDReader:
                         print("Failed to parse tag:", e)
                         pass
 
+            # Check if the main thread is still alive
+            if self.tagThreadWatchdog is not None and time.time() - self.tagThreadWatchdog > 5:
+                print("Main thread not alive... killing")
+                os._exit(0)
+            
+
         print("Tag processing thread killed")
         os._exit(0)
 
@@ -427,6 +434,7 @@ if __name__ == "__main__":
 
         eel.start("index.html", host="localhost", port=3467, block=False, close_callback=onGUIClose, shutdown_delay=5, cmdline_args=[
                   "--disable-web-security", "--disable-translate", "--enable-kiosk-mode"])
+        
         # Ensure we are receiving is_alive messages from the GUI
         # watchdog = time.time() + 20 # Give the GUI 15 seconds to start
         while True:
