@@ -80,7 +80,8 @@ export function getRecentDataFromArray(array) {
 }
 
 export const defaultFields = [
-    { label: 'Timestamp', value: 'seen', unit: 'ms' },
+    { label: 'Timestamp (Python)', value: 'seenPy', unit: 's' },
+    { label: 'Timestamp (LLRP)', value: 'seen', unit: 's?' },
     { label: 'Processing Time', value: 'processing_time', unit: 'ms' },
     { label: 'RSSI', value: 'rssi', unit: 'dBm' },
     { label: 'EPC', value: 'epc' },
